@@ -21,8 +21,11 @@
   #:use-module ((guix licenses) #:prefix license:)
   #:use-module (guix packages)
   #:use-module (guix download)
+  #:use-module (guix build-system gnu)
   #:use-module (guix build-system python)
   #:use-module (gnu packages)
+  #:use-module (gnu packages java)
+  #:use-module (gnu packages perl)
   #:use-module (gnu packages python))
 
 (define-public fastaq
@@ -50,3 +53,44 @@
      "Fastaq is a Python script and library to manipulate genetic data.  Currently
 supported input formats are: FASTA, FASTQ, GFF3, EMBL,GBK, Phylip; optionally gzipped.")
     (license license:gpl3)))
+
+(define-public canu
+  (package
+    (name "canu")
+    (version "1.3")
+    (source (origin
+              (method url-fetch)
+              (uri (string-append "https://github.com/marbl/canu"
+                                  "/archive/v" version ".tar.gz"))
+              (file-name (string-append name "-" version ".tar.gz"))
+              (sha256
+               (base32
+                "0ms4b3fg744d3crbglv80dixfwkpq5iv57wbfczmaxdgkfcy91bs"))))
+    (build-system gnu-build-system)
+    (arguments
+     `(#:tests? #f ; there are no tests
+       #:phases
+       (modify-phases %standard-phases
+         ;; hijack configure phase to change to Makefile directory
+         (replace 'configure
+           (lambda _ (chdir "src")))
+         ;; no "install" target
+         (replace 'install
+           (lambda* (#:key outputs #:allow-other-keys)
+             (let ((bin (string-append (assoc-ref outputs "out")
+                                       "/bin")))
+               (mkdir-p bin)
+               (copy-recursively "../Linux-amd64/bin" bin)))))))
+    (inputs
+     `(("perl", perl)))
+    (propagated-inputs
+     `(("jre", icedtea-8)))
+    (supported-systems '("x86_64-linux")) ;; TODO: arm support
+    (home-page "https://github.com/marbl/canu")
+    (synopsis "Single molecule sequence assembler for genomes large and small")
+    (description
+     "Canu is a fork of the Celera Assembler, designed for high-noise single-molecule
+sequencing.  Canu is a hierarchical assembly pipeline which runs in four steps:
+detect overlys in high-noise sequences using MHAP; generate corrected sequence consensus;
+trim corrected sequences; and assemble trimmed corrected sequences.")
+    (license license:gpl2)))
