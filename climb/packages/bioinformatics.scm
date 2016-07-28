@@ -21,9 +21,12 @@
   #:use-module ((guix licenses) #:prefix license:)
   #:use-module (guix packages)
   #:use-module (guix download)
+  #:use-module (guix build-system cmake)
   #:use-module (guix build-system gnu)
   #:use-module (guix build-system python)
   #:use-module (climb packages compression)
+  #:use-module (climb packages facebook)
+  #:use-module (climb packages formatting)
   #:use-module (climb packages machine-learning)
   #:use-module (climb packages python)
   #:use-module (gnu packages)
@@ -33,11 +36,16 @@
   #:use-module (gnu packages check)
   #:use-module (gnu packages compression)
   #:use-module (gnu packages java)
+  #:use-module (gnu packages jemalloc)
+  #:use-module (gnu packages llvm)
+  #:use-module (gnu packages logging)
   #:use-module (gnu packages maths)
   #:use-module (gnu packages perl)
   #:use-module (gnu packages pkg-config)
   #:use-module (gnu packages python)
-  #:use-module (gnu packages tcsh))
+  #:use-module (gnu packages readline)
+  #:use-module (gnu packages tcsh)
+  #:use-module (gnu packages textutils))
 
 (define-public fastaq
   (package
@@ -389,3 +397,81 @@ complete or draft form.")
     (synopsis "Python3 module for running MUMmer and reading the output")
     (description "Python3 wrapper for running MUMmer and parsing the output.")
     (license license:gpl3)))
+
+(define-public spades
+  (package
+    (name "spades")
+    (version "3.9.0")
+    (source
+     (origin
+       (method url-fetch)
+       (uri (string-append
+             "http://spades.bioinf.spbau.ru/release"
+             version "/SPAdes-" version ".tar.gz"))
+       (file-name (string-append name "-" version ".tar.gz"))
+       (sha256
+        (base32
+         "0agdf9mf0p350mi8cp55q0vlk7wsjrj38hrbh96mia2sjk2nlhvp"))
+       (modules '((guix build utils)))
+       (snippet
+        '(begin
+           ;; prevent exernal deps from being included
+           (substitute* "src/CMakeLists.txt"
+             ;; comment out EXT_DIR reference to avoid matching whole line
+             (("add_subdirectory\\(\\\"\\$\\{EXT_DIR\\}/") "#"))
+           (delete-file-recursively "ext/tools/")
+           (delete-file-recursively "ext/src/")
+           ;; remove include headers that are available in tree
+           (for-each (lambda (dir)
+                       (delete-file-recursively (string-append "ext/include/" dir)))
+                     (list "boost" "city" "cppformat" ;; "folly"
+                           "jemalloc" "kseq" "llvm" "samtools"))
+           (substitute* (list "src/modules/data_structures/sequence/seq.hpp"
+                              "src/modules/data_structures/mph_index/base_hash.hpp")
+             (("^\\#include <city/city.h>") "#include <city.h>"))
+           (substitute* "src/modules/dev_support/perfcounter.hpp"
+             (("^\\#include <cppformat/format.h>") "#include <fmt/format.h>"))
+           (substitute* (list "src/modules/io/reads_io/fasta_fastq_gz_parser.hpp"
+                              "src/modules/io/reads_io/ireadstream.hpp")
+             (("^\\#include \\\"kseq/kseq.h\\\"") "#include <htslib/kseq.h>"))
+           (substitute* "src/utils/adt/small_pod_vector.hpp"
+             (("^\\#include <llvm/PointerIntPair.h>") "#include <llvm/ADT/PointerIntPair.h>"))
+           ))))
+    (build-system cmake-build-system)
+    (arguments
+     `(#:tests? #f
+       #:configure-flags (list
+                          "-G" "Unix Makefiles"
+                          "../src")
+       #:phases
+       (modify-phases %standard-phases
+         (add-before 'configure 'enter-build-directory
+           (lambda _
+             (mkdir-p "spades_build")
+             (chdir "spades_build")))
+         )))
+    (propagated-inputs
+     `(("python" ,python)))
+    (inputs
+     `(("zlib" ,zlib)
+       ("bzip2" ,bzip2)
+       ("readline" ,readline)
+       ("fmt" ,fmt)
+       ("llvm" ,llvm)
+       ;;("glog" ,glog)
+       ("folly" ,folly)
+       ("jemalloc" ,jemalloc)
+       ("cityhash" ,cityhash)
+       ("samtools" ,samtools)
+       ("bamtools" ,bamtools)
+       ("htslib" ,htslib)
+       ("boost" ,boost)))
+    (home-page "http://bioinf.spbau.ru/spades")
+    (synopsis "Genome assembler for standard isolates and single-cell
+MDA bacteria assemblies")
+    (description "SPAdes supports paired-end reads, mate-pairs and unpaired reads.  SPAdes
+can take as input several paired-end and mate-pair libraries simultaneously.  Note, that
+SPAdes was initially designed for small genomes.  It was tested on single-cell and
+standard bacterial and fungal data sets.  SPAdes is not intended for larger genomes (e.g.
+mammalian size genomes).  For such purposes you can use it at your own risk.")
+    (license license:gpl2)))
