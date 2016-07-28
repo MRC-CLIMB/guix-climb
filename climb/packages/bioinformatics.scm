@@ -36,7 +36,8 @@
   #:use-module (gnu packages maths)
   #:use-module (gnu packages perl)
   #:use-module (gnu packages pkg-config)
-  #:use-module (gnu packages python))
+  #:use-module (gnu packages python)
+  #:use-module (gnu packages tcsh))
 
 (define-public fastaq
   (package
@@ -295,3 +296,67 @@ mutations outside of these regions")
               ("python-dendropy" ,python-dendropy)
               ("python-reportlab" ,python-reportlab)
               ("python-pillow" ,python-pillow)))))
+
+(define-public mummer
+  (package
+    (name "mummer")
+    (version "3.23")
+    (source
+     (origin
+       (method url-fetch)
+       (uri (string-append "mirror://sourceforge/mummer/mummer/"
+                           version "/MUMmer"
+                           version ".tar.gz"))
+       (sha256
+        (base32
+         "0bv6mwqg6imgyxga24xm1cb3mfs56zba485kxgmdiq6fv3vx9yhy"))
+       (modules '((guix build utils)))
+       (snippet
+        '(begin
+           (substitute*
+               (list "Makefile"
+                     "scripts/Makefile")
+             ;; remove hard-coded /bin/sh
+             ((" /bin/sh") " sh"))
+           (substitute* "Makefile"
+             ;; scripts must be built separately to set correct output path
+             (("kurtz tigr scripts") "kurtz tigr"))))))
+    (build-system gnu-build-system)
+    (arguments
+     `(#:tests? #f ;; only checks whether build tools are present
+       #:make-flags (let ((out (assoc-ref %outputs "out")))
+                      (list
+                       (string-append "BIN_DIR=" (string-append out "/bin"))
+                       (string-append "AUX_BIN_DIR=" (string-append out "/aux"))
+                       (string-append "SCRIPT_DIR=" (string-append out "/lib"))))
+       #:phases
+       (modify-phases %standard-phases
+         (delete 'configure)
+         (add-before 'build 'create-bin-dir
+                      (lambda* (#:key outputs #:allow-other-keys)
+                        (let* ((out (assoc-ref outputs "out"))
+                               (bin (string-append out "/bin"))
+                               (aux (string-append out "/aux")))
+                          (mkdir-p bin)
+                          (mkdir-p aux))))
+         (add-after 'install 'install-scripts
+           (lambda* (#:key outputs #:allow-other-keys)
+             (let* ((out (assoc-ref outputs "out"))
+                    (bin (string-append out "/bin"))
+                    (aux (string-append out "/aux"))
+                    (lib (string-append out "/lib")))
+               (mkdir-p lib)
+               (chdir "scripts")
+               (zero? (system* "make"
+                               (string-append "SCRIPT_DIR=" lib)
+                               (string-append "BIN_DIR=" bin)
+                               (string-append "AUX_BIN_DIR=" aux)))
+               (copy-file "Foundation.pm" (string-append lib "/Foundation.pm"))))))))
+    (native-inputs
+     `(("perl" ,perl)
+       ("tcsh" ,tcsh)))
+    (home-page "http://mummer.sourceforge.net")
+    (synopsis "Ultra-fast alignment of large-scale DNA and protein sequences")
+    (description "MUMmer is a system for rapidly aligning entire genomes, whether in
+complete or draft form.")
+    (license license:clarified-artistic)))
