@@ -428,3 +428,41 @@ complete or draft form.")
 algorithm and is designed to work with genomes and metagenomes in the form of
 assemblies or reads.")
     (license license:bsd-3)))
+
+(define-public kraken
+  (package
+    (name "kraken")
+    (version "0.10.5-beta")
+    (source (origin
+              (method url-fetch)
+              (uri (string-append
+                    "https://ccb.jhu.edu/software/kraken/dl/kraken-"
+                    version ".tgz"))
+              (sha256
+               (base32
+                "0srl22kway7h9nv5nimblxzd1indnwvbclbbw4ccxp5cw17cc2kw"))))
+    (build-system gnu-build-system)
+    (arguments
+     `(#:tests? #f ;; no tests
+       #:phases
+       (modify-phases %standard-phases
+         (delete 'configure)
+         (delete 'build)
+         (replace 'install
+           (lambda* (#:key outputs #:allow-other-keys)
+             (let* ((out (assoc-ref outputs "out"))
+                    (bin (string-append out "/bin")))
+               (mkdir-p bin)
+               (zero? (system* "./install_kraken.sh" bin))))))))
+    (native-inputs
+     `(("perl" ,perl)))
+    (home-page "https://ccb.jhu.edu/software/kraken/dl/kraken-0.10.5-beta.tgz")
+    (synopsis "Taxonomic sequence classification system")
+    (description "Kraken is a system for assigning taxonomic labels to short DNA
+sequences, usually obtained through metagenomic studies.  Previous attempts by other
+bioinformatics software to accomplish this task have often used sequence alignment or
+machine learning techniques that were quite slow, leading to the development of less
+sensitive but much faster abundance estimation programs.  Kraken aims to achieve high
+sensitivity and high speed by utilizing exact alignments of k-mers and a novel
+classification algorithm.")
+    (license license:gpl3)))
