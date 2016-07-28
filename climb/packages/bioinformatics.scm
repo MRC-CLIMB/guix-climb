@@ -24,6 +24,7 @@
   #:use-module (guix build-system gnu)
   #:use-module (guix build-system python)
   #:use-module (gnu packages)
+  #:use-module (gnu packages bioinformatics)
   #:use-module (gnu packages java)
   #:use-module (gnu packages perl)
   #:use-module (gnu packages python))
@@ -94,3 +95,50 @@ sequencing.  Canu is a hierarchical assembly pipeline which runs in four steps:
 detect overlys in high-noise sequences using MHAP; generate corrected sequence consensus;
 trim corrected sequences; and assemble trimmed corrected sequences.")
     (license license:gpl2)))
+
+(define-public barrnap
+  (package
+    (name "barrnap")
+    (version "0.7")
+    (source
+     (origin
+       (method url-fetch)
+       (uri (string-append
+             "https://github.com/tseemann/barrnap/archive/"
+             version ".tar.gz"))
+       (file-name (string-append name "-" version ".tar.gz"))
+       (sha256
+        (base32
+         "16y040np76my3y82hgk4yy790smbsk4h8d60d5swlv7ha3i768gg"))))
+    (build-system gnu-build-system)
+    (arguments
+     `(#:phases
+       (modify-phases %standard-phases
+         (delete 'build)
+         (delete 'configure)
+         (add-before 'check 'do-not-use-bundled-hmmer
+           (lambda* (#:key inputs #:allow-other-keys)
+             ;; strip bundled HMMER
+             (substitute* "bin/barrnap"
+               (("\\$FindBin::RealBin/../binaries/\\$OPSYS")
+                (string-append (assoc-ref inputs "hmmer") "/bin")))))
+         (replace 'check
+           (lambda _ (zero? (system* "make" "test" "bigtest"))))
+         (replace 'install
+           (lambda* (#:key outputs #:allow-other-keys)
+             (let* ((out (assoc-ref outputs "out"))
+                    (bin (string-append out "/bin"))
+                    (db (string-append out "/db")))
+               (mkdir-p bin)
+               (install-file "bin/barrnap" bin)
+               (mkdir-p db)
+               (copy-recursively "db" db)))))))
+    (inputs
+     `(("perl" ,perl)
+       ("hmmer" ,hmmer)))
+    (synopsis "BAsic Rapid Ribosomal RNA Predictor")
+    (description "Barrnap predicts the location of ribosomal RNA genes in genomes.
+It supports bacteria, archaea, mitochondria and eukaryotes.  It takes FASTA DNA sequence
+as input, and write GFF3 as output.")
+    (home-page "https://github.com/tseemann/barrnap")
+    (license license:gpl3)))
