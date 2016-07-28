@@ -23,9 +23,14 @@
   #:use-module (guix download)
   #:use-module (guix build-system gnu)
   #:use-module (guix build-system python)
+  #:use-module (climb packages compression)
+  #:use-module (climb packages machine-learning)
   #:use-module (gnu packages)
   #:use-module (gnu packages bioinformatics)
+  #:use-module (gnu packages boost)
+  #:use-module (gnu packages compression)
   #:use-module (gnu packages java)
+  #:use-module (gnu packages maths)
   #:use-module (gnu packages perl)
   #:use-module (gnu packages python))
 
@@ -142,3 +147,47 @@ It supports bacteria, archaea, mitochondria and eukaryotes.  It takes FASTA DNA 
 as input, and write GFF3 as output.")
     (home-page "https://github.com/tseemann/barrnap")
     (license license:gpl3)))
+
+(define-public seer
+  (package
+    (name "seer")
+    (version "1.1.1")
+    (source
+     (origin
+       (method url-fetch)
+       (uri (string-append
+             "https://github.com/johnlees/seer/archive/v"
+             version ".tar.gz"))
+       (file-name (string-append name "-" version ".tar.gz"))
+       (sha256
+        (base32
+         "0xnkz2423b84pch5583dp462lj533acyrnlqxrnh866a93871n1h"))))
+    (build-system gnu-build-system)
+    (arguments
+     `(#:test-target "test"
+       #:make-flags
+       (list
+        ;; PREFIX is set to $HOME by default
+        (string-append "PREFIX=" (assoc-ref %outputs "out"))
+        ;; override ldflags to add -lopenblas, required when armadillo is built against it
+        (string-append "SEER_LDLIBS=-lhdf5 -lgzstream -lz -larmadillo"
+                       " -lboost_program_options -llapack -lblas -lopenblas -lpthread"))
+       #:phases
+       (modify-phases %standard-phases
+         (delete 'configure))))
+    (native-inputs
+     `(("perl" ,perl))) ;; required for tests
+    (inputs
+     `(("gzstream" ,gzstream)
+       ("armadillo" ,armadillo)
+       ("zlib" ,zlib)
+       ("boost" ,boost)
+       ("hdf5" ,hdf5)
+       ("dlib" ,dlib)
+       ("openblas" ,openblas)
+       ("lapack" ,lapack)))
+    (home-page "https://github.com/johnlees/seer")
+    (synopsis "Sequence element (kmer) enrichment analysis")
+    (description "Sequence element enrichment analysis to determine the genetic basis
+of bacterial phenotypes")
+    (license license:gpl2)))
