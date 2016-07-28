@@ -26,12 +26,15 @@
   #:use-module (climb packages compression)
   #:use-module (climb packages machine-learning)
   #:use-module (gnu packages)
+  #:use-module (gnu packages autotools)
   #:use-module (gnu packages bioinformatics)
   #:use-module (gnu packages boost)
+  #:use-module (gnu packages check)
   #:use-module (gnu packages compression)
   #:use-module (gnu packages java)
   #:use-module (gnu packages maths)
   #:use-module (gnu packages perl)
+  #:use-module (gnu packages pkg-config)
   #:use-module (gnu packages python))
 
 (define-public fastaq
@@ -229,3 +232,45 @@ sequential and parallel Maximum Likelihood based inference of large phylogenetic
 It can also be used for postanalyses of sets of phylogenetic trees, analyses of
 alignments, and evolutionary placement of short reads.")
     (license license:gpl3)))
+
+(define-public gubbins
+  (package
+    (name "gubbins")
+    (version "2.1.0")
+    (source
+     (origin
+       (method url-fetch)
+       (uri (string-append
+             "https://github.com/sanger-pathogens/gubbins/archive/v"
+             version ".tar.gz"))
+       (file-name (string-append name "-" version ".tar.gz"))
+       (sha256
+        (base32
+         "13ri69xyn5c33g41r7062d768qbdfg42xlwiil1qx1gqxdpx5n97"))))
+    (build-system gnu-build-system)
+    (arguments
+     `(#:phases
+       (modify-phases %standard-phases
+         (add-after 'unpack 'do-not-build-python
+           ;; we build python frontend as a separate package below
+           (lambda _ (substitute* "Makefile.am" ((" python") ""))))
+         (add-before 'configure 'autoconf
+           (lambda _ (zero? (system* "autoreconf" "-vif")))))))
+    (inputs
+     `(("zlib" ,zlib)
+       ("fasttree" ,fasttree)))
+    (native-inputs
+     `(("pkg-config" ,pkg-config)
+       ("autoconf" ,autoconf)
+       ("automake" ,automake)
+       ("libtool" ,libtool)
+       ("check" ,check)
+       ("python" ,python-3)))
+    (home-page "https://sanger-pathogens.github.io/gubbins/")
+    (synopsis "Rapid phylogenetic analysis of recombinant bacterial whole genome
+sequences")
+    (description "Gubbins (Genealogies Unbiased By recomBinations In Nucleotide Sequences)
+is an algorithm that iteratively identifies loci containing elevated densities of base
+substitutions while concurrently constructing a phylogeny based on the putative point
+mutations outside of these regions")
+    (license license:gpl2)))
