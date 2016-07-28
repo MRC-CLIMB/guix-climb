@@ -191,3 +191,41 @@ as input, and write GFF3 as output.")
     (description "Sequence element enrichment analysis to determine the genetic basis
 of bacterial phenotypes")
     (license license:gpl2)))
+
+(define-public raxml
+  (package
+    (name "raxml")
+    (version "8.2.9")
+    (source
+     (origin
+       (method url-fetch)
+       (uri (string-append
+             "https://github.com/stamatak/standard-RAxML/archive/v"
+             version ".tar.gz"))
+       (file-name (string-append name "-" version ".tar.gz"))
+       (sha256
+        (base32
+         "1pv8p2fy67y21a9y4cm7xpvxqjwz2v4201flfjshdq1p8j52rqf7"))))
+    (build-system gnu-build-system)
+    (arguments
+     `(#:tests? #f ;; no tests
+       #:phases
+       (modify-phases %standard-phases
+         (delete 'configure)
+         (replace 'build
+           ;; TODO: allow building all supported optimizations
+           (lambda _ (zero? (system* "make" "-f" "Makefile.PTHREADS.gcc"))))
+         (replace 'install
+           (lambda* (#:key outputs #:allow-other-keys)
+             (let* ((out (assoc-ref outputs "out"))
+                    (bin (string-append out "/bin/")))
+               (mkdir-p bin)
+               ;; TODO: add perl scripts
+               (copy-file "raxmlHPC-PTHREADS" (string-append bin "raxmlHPC"))))))))
+    (home-page "http://www.exelixis-lab.org")
+    (synopsis "Maximum Likelihood based inference of large phylogenetic trees")
+    (description "RAxML (Randomized Axelerated Maximum Likelihood) is a program for
+sequential and parallel Maximum Likelihood based inference of large phylogenetic trees.
+It can also be used for postanalyses of sets of phylogenetic trees, analyses of
+alignments, and evolutionary placement of short reads.")
+    (license license:gpl3)))
