@@ -23,6 +23,7 @@
   #:use-module (guix download)
   #:use-module (guix build-system gnu)
   #:use-module (guix build-system python)
+  #:use-module (climb packages capnproto)
   #:use-module (climb packages compression)
   #:use-module (climb packages machine-learning)
   #:use-module (climb packages python)
@@ -389,3 +390,41 @@ complete or draft form.")
     (synopsis "Python3 module for running MUMmer and reading the output")
     (description "Python3 wrapper for running MUMmer and parsing the output.")
     (license license:gpl3)))
+
+(define-public mash
+  (package
+    (name "mash")
+    (version "1.1")
+    (source (origin
+              (method url-fetch)
+              (uri (string-append
+                    "https://github.com/marbl/mash/archive/v"
+                    version ".tar.gz"))
+              (file-name (string-append name "-" version ".tar.gz"))
+              (sha256
+               (base32
+                "07f4bpz15ggqmr9q7wp1022m0h904zx5l7xxla4w4r7yvghwaygg"))))
+    (build-system gnu-build-system)
+    (arguments
+     `(#:tests? #f ;; no check target
+       #:configure-flags
+       (list
+        (string-append "--with-capnp=" (assoc-ref %build-inputs "capnproto"))
+        (string-append "--with-gsl=" (assoc-ref %build-inputs "gsl")))
+       #:make-flags (list "CC=gcc")
+       #:phases
+       (modify-phases %standard-phases
+         (add-before 'configure 'autoconf
+           (lambda _
+             (zero? (system* "autoconf")))))))
+    (native-inputs `(("autoconf" ,autoconf)))
+    (inputs
+     `(("zlib" ,zlib)
+       ("capnproto" ,capnproto)
+       ("gsl" ,gsl)))
+    (home-page "https://mash.readthedocs.io")
+    (synopsis "Fast genome and metagenome distance estimation using MinHash")
+    (description "Mash is a fast sequence distance estimator that uses the MinHash
+algorithm and is designed to work with genomes and metagenomes in the form of
+assemblies or reads.")
+    (license license:bsd-3)))
