@@ -360,3 +360,32 @@ mutations outside of these regions")
     (description "MUMmer is a system for rapidly aligning entire genomes, whether in
 complete or draft form.")
     (license license:clarified-artistic)))
+
+(define-public pymummer
+  ;; XXX non-deterministic build
+  (package
+    (name "pymummer")
+    (version "0.7.1")
+    (source
+     (origin
+       (method url-fetch)
+       ;; pypi does not have test data
+       (uri
+        (string-append
+         "https://github.com/sanger-pathogens/pymummer/archive/v"
+         version ".tar.gz"))
+       (file-name (string-append name "-" version ".tar.gz"))
+       (sha256
+        (base32
+         "0msfg89zgswx2ddl9bb3fq95006adqzps8rclc6f19099zmpmark"))))
+    (build-system python-build-system)
+    (native-inputs
+     `(("python-nose" ,python-nose)
+       ("perl" ,perl)))
+    (propagated-inputs
+     `(("mummer" ,mummer)
+       ("fastaq" ,fastaq)))
+    (home-page "https://github.com/sanger-pathogens/pymummer")
+    (synopsis "Python3 module for running MUMmer and reading the output")
+    (description "Python3 wrapper for running MUMmer and parsing the output.")
+    (license license:gpl3)))
