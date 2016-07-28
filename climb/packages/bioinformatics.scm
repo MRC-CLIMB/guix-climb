@@ -24,6 +24,7 @@
   #:use-module (guix build-system gnu)
   #:use-module (guix build-system python)
   #:use-module (gnu packages)
+  #:use-module (gnu packages compression)
   #:use-module (gnu packages java)
   #:use-module (gnu packages perl)
   #:use-module (gnu packages python))
@@ -94,3 +95,40 @@ sequencing.  Canu is a hierarchical assembly pipeline which runs in four steps:
 detect overlys in high-noise sequences using MHAP; generate corrected sequence consensus;
 trim corrected sequences; and assemble trimmed corrected sequences.")
     (license license:gpl2)))
+
+(define-public vt
+  (package
+    (name "vt")
+    (version "0.577")
+    (source (origin
+              (method url-fetch)
+              (uri (string-append "https://github.com/atks/vt/archive/"
+                                  version ".tar.gz"))
+              (file-name (string-append name "-" version ".tar.gz"))
+              (sha256
+               (base32
+                "1l30yhv71lk72z5450d73iwv46ql41jsds5lf7j3gaw7wy92b7h0"))
+              (modules '((guix build utils)))
+              (snippet
+               '(begin
+                  ;; remove bundled libraries
+                  (delete-file-recursively "lib")
+                  #t))))
+  (build-system gnu-build-system)
+    (arguments
+     `(#:test-target "test"
+       #:phases
+       (modify-phases %standard-phases
+         (delete 'configure)
+         (replace 'install
+           (lambda* (#:key outputs #:allow-other-keys)
+             (let ((bin (string-append (assoc-ref outputs "out") "/bin")))
+               (mkdir-p bin)
+               (install-file "vt" bin)))))))
+    (inputs
+     `(("zlib" ,zlib)))
+    (synopsis "Tool set for short variant discovery in genetic sequence data")
+    (description "Variant tool set that discovers short variants from Next Generation
+Sequencing data.")
+    (home-page "http://genome.sph.umich.edu/wiki/Vt")
+    (license license:expat)))
