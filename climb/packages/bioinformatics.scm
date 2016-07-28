@@ -25,6 +25,7 @@
   #:use-module (guix build-system python)
   #:use-module (climb packages compression)
   #:use-module (climb packages machine-learning)
+  #:use-module (climb packages python)
   #:use-module (gnu packages)
   #:use-module (gnu packages autotools)
   #:use-module (gnu packages bioinformatics)
@@ -274,3 +275,23 @@ is an algorithm that iteratively identifies loci containing elevated densities o
 substitutions while concurrently constructing a phylogeny based on the putative point
 mutations outside of these regions")
     (license license:gpl2)))
+
+(define-public python-gubbins
+  ;; XXX: non-deterministic build
+  (package (inherit gubbins)
+           (name "python-gubbins")
+           (build-system python-build-system)
+           (arguments
+            `(#:phases
+              (modify-phases %standard-phases
+                (add-after 'unpack 'change-to-python-dir
+                  (lambda _ (chdir "python"))))))
+           (native-inputs
+            `(("python-nose" ,python-nose)
+              ("raxml" ,raxml)))
+           (propagated-inputs
+            `(("gubbins" ,gubbins)
+              ("python-biopython" ,python-biopython)
+              ("python-dendropy" ,python-dendropy)
+              ("python-reportlab" ,python-reportlab)
+              ("python-pillow" ,python-pillow)))))
