@@ -481,12 +481,6 @@ classification algorithm.")
         (base32
          "08sis735qq3f9f9d81d3qbbi9c8fk828hjqac6jxyf80y2ymjb1m"))))
     (build-system python-build-system)
-    (propagated-inputs
-     `(("python2-scipy" ,python2-scipy)
-       ("bowtie" ,bowtie)
-       ("samtools" ,samtools)))
-    (native-inputs
-     `(("python2-mock" ,python2-mock)))
     (arguments
      `(#:python ,python-2 ;; python-2 only
        #:tests? #f ;; TODO: fix tests
@@ -499,8 +493,16 @@ classification algorithm.")
          (add-after 'install 'install-srst2 ;; console script not in install target
            (lambda* (#:key outputs #:allow-other-keys)
              (let* ((out (assoc-ref outputs "out"))
-                    (bin (string-append out "/bin")))
-               (copy-file "scripts/srst2.py" (string-append bin "/srst2"))))))))
+                    (bin (string-append out "/bin"))
+                    (data (string-append out "/data")))
+               (copy-file "scripts/srst2.py" (string-append bin "/srst2"))
+               (copy-recursively "data" data)))))))
+    (native-inputs
+     `(("python2-mock" ,python2-mock)))
+    (propagated-inputs
+     `(("python2-scipy" ,python2-scipy)
+       ("bowtie" ,bowtie)
+       ("samtools" ,samtools)))
     (home-page "https://katholt.github.io/srst2/")
     (synopsis "Short Read Sequence Typing for Bacterial Pathogens")
     (description "This program is designed to take Illumina sequence data,
