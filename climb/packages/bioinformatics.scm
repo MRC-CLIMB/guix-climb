@@ -287,7 +287,16 @@ mutations outside of these regions")
             `(#:phases
               (modify-phases %standard-phases
                 (add-after 'unpack 'change-to-python-dir
-                  (lambda _ (chdir "python"))))))
+                  (lambda _ (chdir "python")))
+                (add-after 'install 'wrap-program
+                  (lambda* (#:key inputs outputs #:allow-other-keys)
+                    (let ((out (assoc-ref outputs "out"))
+                          (path (map (lambda (pkg)
+                                       (string-append (assoc-ref inputs pkg) "/bin"))
+                                     '("gubbins" "raxml"))))
+                      ;; tell run_gubbins.py where gubbins and raxml is
+                      (wrap-program (string-append out "/bin/run_gubbins.py")
+                        `("PATH" ":" prefix (,(string-join path ":"))))))))))
            (native-inputs
             `(("python-nose" ,python-nose)))
            (propagated-inputs
