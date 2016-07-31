@@ -456,7 +456,7 @@ assemblies or reads.")
                (zero? (system* "./install_kraken.sh" bin))))))))
     (native-inputs
      `(("perl" ,perl)))
-    (home-page "https://ccb.jhu.edu/software/kraken/dl/kraken-0.10.5-beta.tgz")
+    (home-page "http://ccb.jhu.edu/software/kraken/")
     (synopsis "Taxonomic sequence classification system")
     (description "Kraken is a system for assigning taxonomic labels to short DNA
 sequences, usually obtained through metagenomic studies.  Previous attempts by other
