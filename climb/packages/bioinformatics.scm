@@ -289,10 +289,10 @@ mutations outside of these regions")
                 (add-after 'unpack 'change-to-python-dir
                   (lambda _ (chdir "python"))))))
            (native-inputs
-            `(("python-nose" ,python-nose)
-              ("raxml" ,raxml)))
+            `(("python-nose" ,python-nose)))
            (propagated-inputs
             `(("gubbins" ,gubbins)
+              ("raxml" ,raxml)
               ("python-biopython" ,python-biopython)
               ("python-dendropy" ,python-dendropy)
               ("python-reportlab" ,python-reportlab)
