@@ -680,3 +680,96 @@ assignment, and phylogenetic reconstruction, and diversity analyses and visualiz
     (synopsis "Command line interface for QIIME 2")
     (description "This package contains the CLI client for qiime2.")
     (license license:bsd-3)))
+
+(define-public python-biom-format
+  ;; XXX non-deterministic
+  (package
+    (name "python-biom-format")
+    (version "2.1.5")
+    (source
+     (origin
+       (method url-fetch)
+       (uri (string-append
+             "https://github.com/biocore/biom-format/archive/"
+             version ".tar.gz"))
+       (file-name (string-append name "-" version ".tar.gz"))
+       (sha256
+        (base32
+         "1n25w3p1rixbpac8iysmzcja6m4ip5r6sz19l8y6wlwi49hxn278"))))
+    (build-system python-build-system)
+    (native-inputs
+     `(("python-future" ,python-future)
+       ("python-h5py" ,python-h5py)
+       ("python-click" ,python-click)))
+    (propagated-inputs
+     `(("python-numpy" ,python-numpy)
+       ("python-scipy" ,python-scipy)))
+    (home-page "https://jupyter.org/")
+    (synopsis "The Biological Observation Matrix (BIOM) format")
+    (description "The BIOM file format (canonically pronounced biome) is designed
+to be a general-use format for representing biological sample by observation
+contingency tables.")
+    (license license:bsd-3)))
+
+(define-public python-scikit-bio
+  ;; XXX non-deterministic build
+  (package
+    (name "python-scikit-bio")
+    (version "0.5.0")
+    (source
+     (origin
+       (method url-fetch)
+       (uri (string-append
+             "https://github.com/biocore/scikit-bio/archive/"
+             version ".tar.gz"))
+       (file-name (string-append name "-" version ".tar.gz"))
+       (sha256
+        (base32
+         "1ddgx31bnwn5936852nxn3a8bag8vqcz645k1jlr5z2kjk2ddhs9"))))
+    (build-system python-build-system)
+    (arguments
+     `(#:tests? #f)) ;; TODO tests require GTK
+    (native-inputs
+     `(("python-coverage" ,python-coverage)
+       ("python-nose" ,python-nose)
+       ("python-requests" ,python-requests)))
+    (propagated-inputs
+     `(("python-cachecontrol" ,python-cachecontrol)
+       ("python-decorator" ,python-decorator)
+       ("python-ipython" ,python-ipython)
+       ("python-lockfile" ,python-lockfile)
+       ("python-natsort" ,python-natsort)
+       ("python-numpy" ,python-numpy)
+       ("python-pandas" ,python-pandas)
+       ("python-scipy" ,python-scipy)))
+    (home-page "http://scikit-bio.org/")
+    (synopsis "Python toolkit for bioinformatics")
+    (description "Data structures, algorithms, and educational resources for
+bioinformatics.")
+    (license license:bsd-3)))
+
+(define-public q2-types
+  (package
+    (name "q2-types")
+    (version "0.0.1")
+    (source
+     (origin
+       (method url-fetch)
+       (uri (string-append
+             "https://github.com/qiime2/q2-types/archive/"
+             version ".tar.gz"))
+       (file-name (string-append name "-" version ".tar.gz"))
+       (sha256
+        (base32
+         "016awdz8aasgjv7wp2nkccmp0cc02r6ahkmvbhg7a57mbiy77spp"))))
+    (build-system python-build-system)
+    (propagated-inputs
+     `(("python-scikit-bio" ,python-scikit-bio)
+       ("python-pandas" ,python-pandas)
+       ("python-ijson" ,python-ijson)
+       ("python-biom-format" ,python-biom-format)
+       ("qiime2" ,qiime2)))
+    (home-page "http://qiime.org")
+    (synopsis "Common QIIME 2 semantic types")
+    (description "Definitions of common QIIME 2 types")
+    (license license:bsd-3)))
