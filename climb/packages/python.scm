@@ -238,3 +238,81 @@ iterator interface.")
     (description "CacheControl is a port of the caching algorithms in httplib2 for
 use with requests session object.")
     (license license:asl2.0)))
+
+(define-public python-pytest-pep8
+  ;; XXX non-deterministic build
+  (package
+    (name "python-pytest-pep8")
+    (version "1.0.6")
+    (source
+     (origin
+       (method url-fetch)
+       (uri (pypi-uri "pytest-pep8" version))
+       (sha256
+        (base32
+         "06032agzhw1i9d9qlhfblnl3dw5hcyxhagn7b120zhrszbjzfbh3"))))
+    (build-system python-build-system)
+    (propagated-inputs
+     `(("python-pytest" ,python-pytest)
+       ("python-pytest-cache" ,python-pytest-cache)
+       ("python-pep8" ,python-pep8)))
+    (home-page "https://bitbucket.org/pytest-dev/pytest-pep8")
+    (synopsis "Py.test plugin to check PEP8 requirements")
+    (description "Pytest plugin for efficiently checking PEP8 compliance")
+    (license license:expat)))
+
+(define-public python-pytest-flakes
+  ;; XXX non-deterministic build
+  (package
+    (name "python-pytest-flakes")
+    (version "1.0.1")
+    (source
+     (origin
+       (method url-fetch)
+       (uri (pypi-uri "pytest-flakes" version))
+       (sha256
+        (base32
+         "0flag3n33kbhyjrhzmq990rvg4yb8hhhl0i48q9hw0ll89jp28lw"))))
+    (build-system python-build-system)
+    (arguments
+     `(#:phases
+       (modify-phases %standard-phases
+         (delete 'check)
+         (add-after 'install 'check
+           (lambda _
+             (zero? (system* "py.test")))))))
+    (native-inputs
+     `(("python-coverage" ,python-coverage)
+       ("python-pytest-cache" ,python-pytest-cache)
+       ("python-pytest-pep8" ,python-pytest-pep8)))
+    (propagated-inputs
+     `(("python-pyflakes" ,python-pyflakes)))
+    (home-page "https://github.com/fschulze/pytest-flakes")
+    (synopsis "Py.test plugin to check source code with pyflakes")
+    (description "Pytest plugin for efficiently checking python source with
+pyflakes.")
+    (license license:expat)))
+
+(define-public python-natsort
+  ;; XXX non-deterministic build
+  (package
+    (name "python-natsort")
+    (version "5.0.1")
+    (source
+     (origin
+       (method url-fetch)
+       (uri (pypi-uri "natsort" version))
+       (sha256
+        (base32
+         "1abld5p4a6n5zjnyw5mi2pv37gqalcybv2brjr2y6l9l2p8v9mja"))))
+    (build-system python-build-system)
+    (native-inputs
+     `(("python-hopythesis" ,python-hypothesis)
+       ("python-pytest-cache" ,python-pytest-cache)
+       ("python-pytest-flakes" ,python-pytest-flakes)
+       ("python-pytest-cov" ,python-pytest-cov)
+       ("python-pytest-pep8" ,python-pytest-pep8)))
+    (home-page "https://github.com/SethMMorton/natsort")
+    (synopsis "Sorts lists naturally")
+    (description "Natural sorting for python")
+    (license license:expat)))
