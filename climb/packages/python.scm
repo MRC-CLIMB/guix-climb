@@ -110,6 +110,7 @@ OpenDocument 1.2 files.")
        (uri (git-reference
              (url "https://github.com/eyeseast/python-frontmatter")
              (commit "c6d769af")))
+       (file-name (string-append name "-" version "-checkout"))
        (sha256
         (base32
          "0w5hipk489lh5b6hdwzbsvxzsvygaz6dlmvw510bkvdmzxlm0vcb"))))
@@ -201,6 +202,7 @@ to support both Python 2 and Python 3 with minimal overhead.")
        (uri (string-append
              "https://github.com/isagalaev/ijson/archive/"
              version ".tar.gz"))
+       (file-name (string-append name "-" version ".tar.gz"))
        (sha256
         (base32
          "15c39jf8skdzcn5zsiq7bsb4zhb8w1x2gbl5rzi6wy5dxg2jrdsx"))))
@@ -234,7 +236,7 @@ iterator interface.")
      `(("python-requests" ,python-requests)
        ("python-lockfile" ,python-lockfile)))
     (home-page "https://github.com/ionrock/cachecontrol")
-    (synopsis "The httplib2 caching algorithms packaged up for use with requests.")
+    (synopsis "The httplib2 caching algorithms packaged up for use with requests")
     (description "CacheControl is a port of the caching algorithms in httplib2 for
 use with requests session object.")
     (license license:asl2.0)))

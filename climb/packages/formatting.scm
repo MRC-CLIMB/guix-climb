@@ -39,7 +39,7 @@
         (base32
          "18cn3hi9fmr31lqprzlx0fgs5wlnkfl33f96plld0rl1b0jxnxgh"))))
     (build-system cmake-build-system)
-    (home-page "http://fmtlib.net")
+    (home-page "http://fmtlib.net/latest/index.html")
     (synopsis "Small, safe and fast formatting library")
     (description "fmt is a formatting library for C++.  It can be used
 as a safe alternative to printf or as a fast alternative to IOStreams.")
