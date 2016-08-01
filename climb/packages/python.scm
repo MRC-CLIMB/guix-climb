@@ -216,3 +216,25 @@ to support both Python 2 and Python 3 with minimal overhead.")
     (description "Ijson is an iterative JSON parser with a standard Python
 iterator interface.")
     (license license:bsd-3)))
+
+(define-public python-cachecontrol
+  ;; XXX non-deterministic build
+  (package
+    (name "python-cachecontrol")
+    (version "0.11.6")
+    (source
+     (origin
+       (method url-fetch)
+       (uri (pypi-uri "CacheControl" version))
+       (sha256
+        (base32
+         "15bn8xll6z15h0zqhfjy1n8dn8p0fcb4m0rhnfanq63z7r2wpprp"))))
+    (build-system python-build-system)
+    (propagated-inputs
+     `(("python-requests" ,python-requests)
+       ("python-lockfile" ,python-lockfile)))
+    (home-page "https://github.com/ionrock/cachecontrol")
+    (synopsis "The httplib2 caching algorithms packaged up for use with requests.")
+    (description "CacheControl is a port of the caching algorithms in httplib2 for
+use with requests session object.")
+    (license license:asl2.0)))
