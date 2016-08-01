@@ -704,7 +704,7 @@ assignment, and phylogenetic reconstruction, and diversity analyses and visualiz
     (propagated-inputs
      `(("python-numpy" ,python-numpy)
        ("python-scipy" ,python-scipy)))
-    (home-page "https://jupyter.org/")
+    (home-page "http://biom-format.org")
     (synopsis "The Biological Observation Matrix (BIOM) format")
     (description "The BIOM file format (canonically pronounced biome) is designed
 to be a general-use format for representing biological sample by observation
