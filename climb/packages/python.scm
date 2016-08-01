@@ -21,6 +21,7 @@
   #:use-module ((guix licenses) #:prefix license:)
   #:use-module (guix packages)
   #:use-module (guix download)
+  #:use-module (guix git-download)
   #:use-module (guix build-system python)
   #:use-module (gnu packages)
   #:use-module (gnu packages python))
@@ -95,4 +96,58 @@ OpenDocument 1.2 files.")
     (home-page "https://github.com/rossant/ipymd")
     (synopsis "Use the IPython notebook as an interactive Markdown editor")
     (description "Converts ipynb JSON objects to markdown")
+    (license license:bsd-3)))
+
+(define-public python-frontmatter
+  ;; XXX non-deterministic build
+  (package
+    (name "python-frontmatter")
+    (version "0.3.1")
+    (source
+     (origin
+       ;; No tagged releases and pip only has osx binary
+       (method git-fetch)
+       (uri (git-reference
+             (url "https://github.com/eyeseast/python-frontmatter")
+             (commit "c6d769af")))
+       (sha256
+        (base32
+         "0w5hipk489lh5b6hdwzbsvxzsvygaz6dlmvw510bkvdmzxlm0vcb"))))
+    (arguments
+     `(#:phases
+       (modify-phases %standard-phases
+         (replace 'check
+           (lambda _
+             (zero? (system* "python" "test.py")))))))
+    (propagated-inputs
+     `(("python-six" ,python-six)
+       ("python-pyyaml" ,python-pyyaml)))
+    (build-system python-build-system)
+    (home-page "https://github.com/eyeseast/python-frontmatter")
+    (synopsis "Parse and manage posts with YAML frontmatter")
+    (description "Jekyll-style YAML front matter offers a useful way to add
+arbitrary, structured metadata to text documents, regardless of type.")
+    (license license:expat)))
+
+(define-public python-jupyter
+  ;; XXX meta-package, add dependencies
+  (package
+    (name "python-jupyter")
+    (version "1.0.0")
+    (source
+     (origin
+       (method url-fetch)
+       (uri (pypi-uri "jupyter" version))
+       (sha256
+        (base32
+         "0pwf3pminkzyzgx5kcplvvbvwrrzd3baa7lmh96f647k30rlpp6r"))))
+    (build-system python-build-system)
+    (arguments
+     `(#:tests? #f)) ;; no tests
+    (home-page "https://jupyter.org/")
+    (synopsis "Interactive data science")
+    (description "The Jupyter Notebook is a web application that allows you to
+create and share documents that contain live code, equations, visualizations and
+explanatory text.  Uses include: data cleaning and transformation, numerical
+simulation, statistical modeling, machine learning and much more.")
     (license license:bsd-3)))
