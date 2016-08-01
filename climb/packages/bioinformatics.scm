@@ -626,3 +626,57 @@ read-pair linkage - to automatically bin metagenomic contigs into genomes.")
 Repeats (CRISPRs) in full genomes or environmental datasets such as metagenomes,
 in which sequence size can be anywhere from 100 to 800 bp.")
     (license license:gpl3)))
+
+(define-public qiime2
+  (package
+    (name "qiime2")
+    (version "2.0.1")
+    (source
+     (origin
+       (method url-fetch)
+       (uri (string-append
+             "https://github.com/qiime2/qiime2/archive/"
+             version ".tar.gz"))
+       (file-name (string-append name "-" version ".tar.gz"))
+       (sha256
+        (base32
+         "1bxf4vbgxi62pc1cvw5pgrb826ky0xm40bplv2k4cz64pmba067n"))))
+    (build-system python-build-system)
+    (propagated-inputs
+     `(("python-pyyaml" ,python-pyyaml)
+       ("python-decorator" ,python-decorator)
+       ("python-ipymd" ,python-ipymd)
+       ("python-jupyter" ,python-jupyter)
+       ("python-frontmatter" ,python-frontmatter)
+       ("python-pandas" ,python-pandas)))
+    (home-page "http://qiime.org")
+    (synopsis "Quantitative Insights Into Microbial Ecology")
+    (description "QIIME is a bioinformatics pipeline for performing microbiome analysis
+from raw DNA sequencing data.  QIIME is designed to take users from raw sequencing data
+generated on the Illumina or other platforms through publication quality graphics and
+statistics.  This includes demultiplexing and quality filtering, OTU picking, taxonomic
+assignment, and phylogenetic reconstruction, and diversity analyses and visualizations.")
+    (license license:bsd-3)))
+
+(define-public q2cli
+  (package
+    (name "q2cli")
+    (version "0.0.2")
+    (source
+     (origin
+       (method url-fetch)
+       (uri (string-append
+             "https://github.com/qiime2/q2cli/archive/"
+             version ".tar.gz"))
+       (file-name (string-append name "-" version ".tar.gz"))
+       (sha256
+        (base32
+         "1vs2hi9w95niprb7ap08dypjk340wwlw7axipfam67fflb2r1w3a"))))
+    (build-system python-build-system)
+    (propagated-inputs
+     `(("python-click" ,python-click)
+       ("qiime2" ,qiime2)))
+    (home-page "http://qiime.org")
+    (synopsis "Command line interface for QIIME 2")
+    (description "This package contains the CLI client for qiime2.")
+    (license license:bsd-3)))
