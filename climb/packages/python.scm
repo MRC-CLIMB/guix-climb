@@ -189,3 +189,30 @@ simulation, statistical modeling, machine learning and much more.")
 2 and Python 3.  It allows you to use a single, clean Python 3.x-compatible codebase
 to support both Python 2 and Python 3 with minimal overhead.")
     (license license:expat)))
+
+(define-public python-ijson
+  ;;; XXX non-deterministic
+  (package
+    (name "python-ijson")
+    (version "2.3")
+    (source
+     (origin
+       (method url-fetch)
+       (uri (string-append
+             "https://github.com/isagalaev/ijson/archive/"
+             version ".tar.gz"))
+       (sha256
+        (base32
+         "15c39jf8skdzcn5zsiq7bsb4zhb8w1x2gbl5rzi6wy5dxg2jrdsx"))))
+    (arguments
+      `(#:phases
+        (modify-phases %standard-phases
+          (replace 'check
+            (lambda _
+              (zero? (system* "python" "tests.py")))))))
+    (build-system python-build-system)
+    (home-page "https://github.com/isagalaev/ijson")
+    (synopsis "Iterative JSON parser with Pythonic interface")
+    (description "Ijson is an iterative JSON parser with a standard Python
+iterator interface.")
+    (license license:bsd-3)))
