@@ -151,3 +151,41 @@ create and share documents that contain live code, equations, visualizations and
 explanatory text.  Uses include: data cleaning and transformation, numerical
 simulation, statistical modeling, machine learning and much more.")
     (license license:bsd-3)))
+
+(define-public python-future
+  ;;; XXX non-deterministic
+  (package
+    (name "python-future")
+    (version "0.15.2")
+    (source
+     (origin
+       (method url-fetch)
+       (uri (pypi-uri "future" version))
+       (sha256
+        (base32
+         "15wvcfzssc68xqnqi1dq4fhd0848hwi9jn42hxyvlqna40zijfrx"))))
+    (arguments
+     ;; FIXME: tests require internet access
+     ;; see https://github.com/PythonCharmers/python-future/issues/165
+      `(#:tests? #f))
+;;        #:phases
+;;        (modify-phases %standard-phases
+;;          (replace 'check
+;;            (lambda _
+;;              ;; Upstream runs tests after installation and the package itself
+;;              ;; resides in a subdirectory. Extend PYTHONPATH so it will be
+;;              ;; found.
+;;              (setenv "PYTHONPATH"
+;;                      (string-append (getcwd) "/build/lib:"
+;;                                     (getenv "PYTHONPATH")))
+;;              (zero? (system* "py.test" "-vv")))))))
+    (build-system python-build-system)
+    (native-inputs
+     `(("python-pytest" ,python-pytest)
+       ("python-requests" ,python-requests)))
+    (home-page "http://python-future.org")
+    (synopsis "Easy, clean, reliable Python 2/3 compatibility")
+    (description "python-future is the missing compatibility layer between Python
+2 and Python 3.  It allows you to use a single, clean Python 3.x-compatible codebase
+to support both Python 2 and Python 3 with minimal overhead.")
+    (license license:expat)))
