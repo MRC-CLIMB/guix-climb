@@ -87,11 +87,12 @@ OpenDocument 1.2 files.")
      `(#:tests? #f)) ;; FIXME some tests are failing
     (native-inputs
      `(("python-pytest-cov" ,python-pytest-cov)
-       ("python-jsonschema" ,python-jsonschema)
        ("python-odfpy" ,python-odfpy)
        ("python-ipython" ,python-ipython)))
     (propagated-inputs
-     `(("python-pyaml" ,python-pyyaml)))
+     `(("python-pyaml" ,python-pyyaml)
+       ;; XXX jsonschema should probably be propagated from ipython
+       ("python-jsonschema" ,python-jsonschema)))
     (build-system python-build-system)
     (home-page "https://github.com/rossant/ipymd")
     (synopsis "Use the IPython notebook as an interactive Markdown editor")
