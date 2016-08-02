@@ -35,6 +35,7 @@
   #:use-module (gnu packages compression)
   #:use-module (gnu packages java)
   #:use-module (gnu packages maths)
+  #:use-module (gnu packages mpi)
   #:use-module (gnu packages perl)
   #:use-module (gnu packages pkg-config)
   #:use-module (gnu packages python)
@@ -211,23 +212,43 @@ of bacterial phenotypes")
        (file-name (string-append name "-" version ".tar.gz"))
        (sha256
         (base32
-         "1pv8p2fy67y21a9y4cm7xpvxqjwz2v4201flfjshdq1p8j52rqf7"))))
+         "1pv8p2fy67y21a9y4cm7xpvxqjwz2v4201flfjshdq1p8j52rqf7"))
+       (modules '((guix build utils)))
+       (snippet
+        ;; Delete 18MB of bundled windows executables.
+        '(for-each delete-file-recursively
+                   (find-files "." "^WindowsExecutables.*"
+                               #:directories? #t)))))
     (build-system gnu-build-system)
     (arguments
-     `(#:tests? #f ;; no tests
+     `(#:tests? #f ;; No tests.
        #:phases
        (modify-phases %standard-phases
          (delete 'configure)
          (replace 'build
-           ;; TODO: allow building all supported optimizations
-           (lambda _ (zero? (system* "make" "-f" "Makefile.PTHREADS.gcc"))))
+           ;; RAxML ships with a separate Makefile for each optimization.
+           ;; We simply build all of them and add to the default ouput.
+           (lambda _
+             (for-each (lambda (makefile)
+                         ;; Parallel build not supported.
+                         (zero? (system* "make" "-j" "1" "-f" makefile)))
+                       (find-files "." "^Makefile.*\\.gcc$"))))
          (replace 'install
            (lambda* (#:key outputs #:allow-other-keys)
              (let* ((out (assoc-ref outputs "out"))
-                    (bin (string-append out "/bin/")))
-               (mkdir-p bin)
-               ;; TODO: add perl scripts
-               (copy-file "raxmlHPC-PTHREADS" (string-append bin "raxmlHPC"))))))))
+                    (bin (string-append out "/bin"))
+                    (doc (string-append out "/share/doc")))
+               (mkdir-p doc)
+               (copy-recursively "manual" (string-append doc "/RAxML"))
+               (for-each (lambda (file)
+                           (install-file file bin))
+                         (find-files "." "^raxmlHPC.*"))
+               (for-each (lambda (file)
+                           (install-file file bin))
+                         (find-files "usefulScripts" ".*"))))))))
+    (native-inputs
+     `(("mpi" ,openmpi)
+       ("perl" ,perl)))
     (home-page "http://www.exelixis-lab.org")
     (synopsis "Maximum Likelihood based inference of large phylogenetic trees")
     (description "RAxML (Randomized Axelerated Maximum Likelihood) is a program for
