@@ -75,7 +75,6 @@ OpenDocument 1.2 files.")
 
 (define-public python-ipymd
   (package
-    ;; XXX non-deterministic build
     (name "python-ipymd")
     (version "0.1.2")
     (source
@@ -86,7 +85,9 @@ OpenDocument 1.2 files.")
         (base32
          "092x1k478bgxaa9b7kzxy1a4vvsdcj1fvx4cdyvf94az6pqncf8b"))))
     (arguments
-     `(#:tests? #f)) ;; FIXME some tests are failing
+     `(#:tests? #f ;; FIXME some tests are failing
+       #:configure-flags '("--single-version-externally-managed"
+                           "--root=/"))) ;; avoid making eggs
     (native-inputs
      `(("python-pytest-cov" ,python-pytest-cov)
        ("python-odfpy" ,python-odfpy)
