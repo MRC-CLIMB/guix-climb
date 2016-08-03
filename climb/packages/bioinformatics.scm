@@ -39,6 +39,7 @@
   #:use-module (gnu packages perl)
   #:use-module (gnu packages pkg-config)
   #:use-module (gnu packages python)
+  #:use-module (gnu packages statistics)
   #:use-module (gnu packages tcsh))
 
 (define-public fastaq
@@ -801,6 +802,17 @@ bioinformatics.")
         (base32
          "016awdz8aasgjv7wp2nkccmp0cc02r6ahkmvbhg7a57mbiy77spp"))))
     (build-system python-build-system)
+    (arguments
+     `(#:tests? #f ;; FIXME: tests require GTK
+       #:configure-flags '("--single-version-externally-managed"
+                          "--root=/"))) ;; avoid making eggs
+    ;#:phases
+    ;(modify-phases %standard-phases
+    ;  (replace 'check
+    ;    (lambda _ (zero? (system* "nosetests")))))))
+    ;(native-inputs
+    ; `(("python-nose" ,python-nose)
+    ;   ("python-future" ,python-future)))
     (propagated-inputs
      `(("python-scikit-bio" ,python-scikit-bio)
        ("python-pandas" ,python-pandas)
@@ -810,4 +822,75 @@ bioinformatics.")
     (home-page "http://qiime.org")
     (synopsis "Common QIIME 2 semantic types")
     (description "Definitions of common QIIME 2 types")
+    (license license:bsd-3)))
+
+(define-public q2-feature-table
+  (package
+    (name "q2-feature-table")
+    (version "0.0.1")
+    (source
+     (origin
+       (method url-fetch)
+       (uri (string-append
+             "https://github.com/qiime2/" name "/archive/"
+             version ".tar.gz"))
+       (file-name (string-append name "-" version ".tar.gz"))
+       (sha256
+        (base32
+         "1f9rp6d8vh4m1s6xfn1ylpsidqwnrkdr8f2wm1brizz5pkxpwp3k"))))
+    (build-system python-build-system)
+    (arguments
+     `(#:tests? #f ;; FIXME: tests require GTK
+       #:configure-flags '("--single-version-externally-managed"
+                           "--root=/"))) ;; avoid making eggs
+       ;#:phases
+       ;(modify-phases %standard-phases
+       ;  (replace 'check
+       ;    (lambda _ (zero? (system* "nosetests")))))))
+    ;(native-inputs
+    ; `(("python-nose" ,python-nose)
+    ;   ("python-future" ,python-future)))
+    (propagated-inputs
+     `(("python-biom-format" ,python-biom-format)
+       ("python-scipy" ,python-scipy)
+       ("python-seaborn" ,python-seaborn)
+       ("q2-types" ,q2-types)
+       ("qiime2" ,qiime2)))
+    (home-page "http://qiime.org")
+    (synopsis "QIIME2 plugin for working with sample x feature tables")
+    (description "Official QIIME 2 plugin supporting basic operations on
+sample x feature tables.")
+    (license license:bsd-3)))
+
+(define-public q2-diversity
+  (package
+    (name "q2-diversity")
+    (version "0.0.1")
+    (source
+     (origin
+       (method url-fetch)
+       (uri (string-append
+             "https://github.com/qiime2/" name "/archive/"
+             version ".tar.gz"))
+       (file-name (string-append name "-" version ".tar.gz"))
+       (sha256
+        (base32
+         "12596zc3v7v7hslvql84msw8p115kjijzmm5lypgh3qya8qg8vi5"))))
+    (build-system python-build-system)
+    (propagated-inputs
+     `(("python-biom-format" ,python-biom-format)
+       ("python-numpy" ,python-numpy)
+       ("python-scipy" ,python-scipy)
+       ("python-scikit-bio" ,python-scikit-bio)
+       ("python-pandas" ,python-pandas)
+       ("python-seaborn" ,python-seaborn)
+       ("python-statsmodels" ,python-statsmodels)
+       ("q2-types" ,q2-types)
+       ("q2-feature-table" ,q2-feature-table)
+       ("qiime2" ,qiime2)))
+    (home-page "http://qiime.org")
+    (synopsis "QIIME2 plugin for core diversity analyses")
+    (description "This plugin provides functionality for performing alpha and
+beta diversity analyses (as well as some related statistics and visualizations)
+in QIIME 2.")
     (license license:bsd-3)))
