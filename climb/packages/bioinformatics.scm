@@ -58,6 +58,9 @@
         (base32
          "1y02gm1sk6hwgzmal9kwrpwnsmykk58337079ar5i7vdjnrb5vyy"))))
     (build-system python-build-system)
+    (arguments
+     `(#:configure-flags '("--single-version-externally-managed"
+                           "--root=/"))) ;; avoid making eggs
     (native-inputs
      `(("python-nose" ,python-nose)))
     (home-page "https://github.com/sanger-pathogens/Fastaq")
@@ -305,10 +308,12 @@ mutations outside of these regions")
            (name "python-gubbins")
            (build-system python-build-system)
            (arguments
-            `(#:tests? #f
+            `(#:configure-flags '("--single-version-externally-managed"
+                                  "--root=/") ;; avoid making eggs
               ;; TODO: even with the below raxml-AVX patch, there is still one
               ;; AssertionError on test_external_dependancies.py:82
               ;; Disable for now. It was working before commit b022191.
+              #:tests? #f
               #:phases
               (modify-phases %standard-phases
                 (add-after 'unpack 'do-not-use-raxml-avx
@@ -403,7 +408,6 @@ complete or draft form.")
     (license license:clarified-artistic)))
 
 (define-public pymummer
-  ;; XXX non-deterministic build
   (package
     (name "pymummer")
     (version "0.7.1")
@@ -420,6 +424,9 @@ complete or draft form.")
         (base32
          "0msfg89zgswx2ddl9bb3fq95006adqzps8rclc6f19099zmpmark"))))
     (build-system python-build-system)
+    (arguments
+     `(#:configure-flags '("--single-version-externally-managed"
+                           "--root=/"))) ;; avoid making eggs
     (native-inputs
      `(("python-nose" ,python-nose)
        ("perl" ,perl)))

@@ -27,7 +27,6 @@
   #:use-module (gnu packages python))
 
 (define-public python-reportlab
-  ;; XXX non-deterministic build
   (package
     (name "python-reportlab")
     (version "3.3.0")
@@ -38,6 +37,9 @@
                (base32
                 "0rz2pg04wnzjjm2f5a8ik9v8s54mv4xrjhv5liqjijqv6awh12gl"))))
     (build-system python-build-system)
+    (arguments
+     `(#:configure-flags '("--single-version-externally-managed"
+                           "--root=/"))) ;; avoid making eggs
     (propagated-inputs
      `(("python-pillow" ,python-pillow)))
     (home-page "http://www.reportlab.com")
@@ -100,7 +102,6 @@ OpenDocument 1.2 files.")
     (license license:bsd-3)))
 
 (define-public python-frontmatter
-  ;; XXX non-deterministic build
   (package
     (name "python-frontmatter")
     (version "0.3.1")
@@ -116,7 +117,9 @@ OpenDocument 1.2 files.")
         (base32
          "0w5hipk489lh5b6hdwzbsvxzsvygaz6dlmvw510bkvdmzxlm0vcb"))))
     (arguments
-     `(#:phases
+     `(#:configure-flags '("--single-version-externally-managed"
+                          "--root=/") ;; avoid making eggs
+       #:phases
        (modify-phases %standard-phases
          (replace 'check
            (lambda _
@@ -155,7 +158,6 @@ simulation, statistical modeling, machine learning and much more.")
     (license license:bsd-3)))
 
 (define-public python-future
-  ;;; XXX non-deterministic
   (package
     (name "python-future")
     (version "0.15.2")
@@ -169,7 +171,9 @@ simulation, statistical modeling, machine learning and much more.")
     (arguments
      ;; FIXME: tests require internet access
      ;; see https://github.com/PythonCharmers/python-future/issues/165
-      `(#:tests? #f))
+     `(#:tests? #f
+       #:configure-flags '("--single-version-externally-managed"
+                             "--root=/"))) ;; avoid making eggs
 ;;        #:phases
 ;;        (modify-phases %standard-phases
 ;;          (replace 'check
@@ -193,7 +197,6 @@ to support both Python 2 and Python 3 with minimal overhead.")
     (license license:expat)))
 
 (define-public python-ijson
-  ;;; XXX non-deterministic
   (package
     (name "python-ijson")
     (version "2.3")
@@ -208,7 +211,9 @@ to support both Python 2 and Python 3 with minimal overhead.")
         (base32
          "15c39jf8skdzcn5zsiq7bsb4zhb8w1x2gbl5rzi6wy5dxg2jrdsx"))))
     (arguments
-      `(#:phases
+      `(#:configure-flags '("--single-version-externally-managed"
+                            "--root=/") ;; avoid making eggs
+        #:phases
         (modify-phases %standard-phases
           (replace 'check
             (lambda _
@@ -221,7 +226,6 @@ iterator interface.")
     (license license:bsd-3)))
 
 (define-public python-cachecontrol
-  ;; XXX non-deterministic build
   (package
     (name "python-cachecontrol")
     (version "0.11.6")
@@ -233,6 +237,9 @@ iterator interface.")
         (base32
          "15bn8xll6z15h0zqhfjy1n8dn8p0fcb4m0rhnfanq63z7r2wpprp"))))
     (build-system python-build-system)
+    (arguments
+    `(#:configure-flags '("--single-version-externally-managed"
+                          "--root=/"))) ;; avoid making eggs
     (propagated-inputs
      `(("python-requests" ,python-requests)
        ("python-lockfile" ,python-lockfile)))
@@ -243,7 +250,6 @@ use with requests session object.")
     (license license:asl2.0)))
 
 (define-public python-pytest-pep8
-  ;; XXX non-deterministic build
   (package
     (name "python-pytest-pep8")
     (version "1.0.6")
@@ -255,6 +261,9 @@ use with requests session object.")
         (base32
          "06032agzhw1i9d9qlhfblnl3dw5hcyxhagn7b120zhrszbjzfbh3"))))
     (build-system python-build-system)
+    (arguments
+     `(#:configure-flags '("--single-version-externally-managed"
+                           "--root=/"))) ;; avoid making eggs
     (propagated-inputs
      `(("python-pytest" ,python-pytest)
        ("python-pytest-cache" ,python-pytest-cache)
@@ -265,7 +274,6 @@ use with requests session object.")
     (license license:expat)))
 
 (define-public python-pytest-flakes
-  ;; XXX non-deterministic build
   (package
     (name "python-pytest-flakes")
     (version "1.0.1")
@@ -278,7 +286,9 @@ use with requests session object.")
          "0flag3n33kbhyjrhzmq990rvg4yb8hhhl0i48q9hw0ll89jp28lw"))))
     (build-system python-build-system)
     (arguments
-     `(#:phases
+     `(#:configure-flags '("--single-version-externally-managed"
+                           "--root=/") ;; avoid making eggs
+       #:phases
        (modify-phases %standard-phases
          (delete 'check)
          (add-after 'install 'check
@@ -297,7 +307,6 @@ pyflakes.")
     (license license:expat)))
 
 (define-public python-natsort
-  ;; XXX non-deterministic build
   (package
     (name "python-natsort")
     (version "5.0.1")
@@ -309,6 +318,9 @@ pyflakes.")
         (base32
          "1abld5p4a6n5zjnyw5mi2pv37gqalcybv2brjr2y6l9l2p8v9mja"))))
     (build-system python-build-system)
+    (arguments
+     `(#:configure-flags '("--single-version-externally-managed"
+                           "--root=/"))) ;; avoid making eggs
     (native-inputs
      `(("python-hopythesis" ,python-hypothesis)
        ("python-pytest-cache" ,python-pytest-cache)
