@@ -720,36 +720,6 @@ assignment, and phylogenetic reconstruction, and diversity analyses and visualiz
     (description "This package contains the CLI client for qiime2.")
     (license license:bsd-3)))
 
-(define-public python-biom-format
-  ;; XXX non-deterministic
-  (package
-    (name "python-biom-format")
-    (version "2.1.5")
-    (source
-     (origin
-       (method url-fetch)
-       (uri (string-append
-             "https://github.com/biocore/biom-format/archive/"
-             version ".tar.gz"))
-       (file-name (string-append name "-" version ".tar.gz"))
-       (sha256
-        (base32
-         "1n25w3p1rixbpac8iysmzcja6m4ip5r6sz19l8y6wlwi49hxn278"))))
-    (build-system python-build-system)
-    (native-inputs
-     `(("python-future" ,python-future)
-       ("python-h5py" ,python-h5py)
-       ("python-click" ,python-click)))
-    (propagated-inputs
-     `(("python-numpy" ,python-numpy)
-       ("python-scipy" ,python-scipy)))
-    (home-page "http://biom-format.org")
-    (synopsis "The Biological Observation Matrix (BIOM) format")
-    (description "The BIOM file format (canonically pronounced biome) is designed
-to be a general-use format for representing biological sample by observation
-contingency tables.")
-    (license license:bsd-3)))
-
 (define-public python-scikit-bio
   ;; XXX non-deterministic build
   (package
