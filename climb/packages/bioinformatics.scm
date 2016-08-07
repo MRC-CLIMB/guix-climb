@@ -40,7 +40,7 @@
   #:use-module (gnu packages pkg-config)
   #:use-module (gnu packages python)
   #:use-module (gnu packages statistics)
-  #:use-module (gnu packages tcsh))
+  #:use-module (gnu packages shells))
 
 (define-public fastaq
   (package
