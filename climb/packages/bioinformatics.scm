@@ -631,17 +631,24 @@ read-pair linkage - to automatically bin metagenomic contigs into genomes.")
        (file-name (string-append name "-" version ".tar.gz"))
        (sha256
         (base32
-         "0wxmlsapxfpxfd3ps9636h7i2xy6la8i42mwh0j2lsky63h63jp1"))
-       (modules '((guix build utils)))
-       (snippet ;; fix test for latest version
-        '(substitute* "t/Aquifex_aeolicus_VF5.expected"
-                     (("minced:0.1.6") "minced:0.2.0")))))
+         "0wxmlsapxfpxfd3ps9636h7i2xy6la8i42mwh0j2lsky63h63jp1"))))
     (build-system gnu-build-system)
     (arguments
      `(#:test-target "test"
        #:phases
        (modify-phases %standard-phases
          (delete 'configure)
+         (add-before 'check 'fix-test
+           (lambda _
+             ;; This is fixed in git.
+             (substitute* "t/Aquifex_aeolicus_VF5.expected"
+               (("minced:0.1.6") "minced:0.2.0"))))
+         (add-before 'install 'set-java-path
+           (lambda* (#:key inputs #:allow-other-keys)
+             (substitute* "minced"
+               ;; Set full path to java binary.
+               (("^java") (string-append (assoc-ref inputs "jre")
+                                         "/bin/java")))))
          (replace 'install
            (lambda* (#:key outputs #:allow-other-keys)
              (let* ((out (assoc-ref outputs "out"))
@@ -651,7 +658,7 @@ read-pair linkage - to automatically bin metagenomic contigs into genomes.")
                          (list "minced" "minced.jar"))))))))
     (native-inputs
      `(("jdk", icedtea "jdk")))
-    (propagated-inputs
+    (inputs
      `(("jre", icedtea)))
     (home-page "https://github.com/ctSkennerton/minced")
     (synopsis "Mining CRISPRs in Environmental Datasets")
