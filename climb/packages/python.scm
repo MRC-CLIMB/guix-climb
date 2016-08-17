@@ -26,29 +26,6 @@
   #:use-module (gnu packages)
   #:use-module (gnu packages python))
 
-(define-public python-reportlab
-  (package
-    (name "python-reportlab")
-    (version "3.3.0")
-    (source (origin
-              (method url-fetch)
-              (uri (pypi-uri "reportlab" version))
-              (sha256
-               (base32
-                "0rz2pg04wnzjjm2f5a8ik9v8s54mv4xrjhv5liqjijqv6awh12gl"))))
-    (build-system python-build-system)
-    (arguments
-     `(#:configure-flags '("--single-version-externally-managed"
-                           "--root=/"))) ;; avoid making eggs
-    (propagated-inputs
-     `(("python-pillow" ,python-pillow)))
-    (home-page "http://www.reportlab.com")
-    (synopsis "Python library for generating PDFs and graphics")
-    (description
-     "This is the ReportLab PDF Toolkit.  It allows rapid creation of rich PDF documents,
-and also creation of charts in a variety of bitmap and vector formats.")
-    (license license:bsd-3)))
-
 (define-public python-odfpy
   (package
     (name "python-odfpy")
