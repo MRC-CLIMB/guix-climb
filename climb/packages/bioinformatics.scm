@@ -618,57 +618,6 @@ information - sequence composition, coverage across multiple sample, and
 read-pair linkage - to automatically bin metagenomic contigs into genomes.")
     (license license:bsd-2)))
 
-(define-public minced
-  ;; XXX non-deterministic build
-  (package
-    (name "minced")
-    (version "0.2.0")
-    (source
-     (origin
-       (method url-fetch)
-       (uri (string-append
-             "https://github.com/ctSkennerton/minced/archive/"
-             version ".tar.gz"))
-       (file-name (string-append name "-" version ".tar.gz"))
-       (sha256
-        (base32
-         "0wxmlsapxfpxfd3ps9636h7i2xy6la8i42mwh0j2lsky63h63jp1"))))
-    (build-system gnu-build-system)
-    (arguments
-     `(#:test-target "test"
-       #:phases
-       (modify-phases %standard-phases
-         (delete 'configure)
-         (add-before 'check 'fix-test
-           (lambda _
-             ;; This is fixed in git.
-             (substitute* "t/Aquifex_aeolicus_VF5.expected"
-               (("minced:0.1.6") "minced:0.2.0"))))
-         (add-before 'install 'set-java-path
-           (lambda* (#:key inputs #:allow-other-keys)
-             (substitute* "minced"
-               ;; Set full path to java binary.
-               (("^java") (string-append (assoc-ref inputs "jre")
-                                         "/bin/java")))))
-         (replace 'install
-           (lambda* (#:key outputs #:allow-other-keys)
-             (let* ((out (assoc-ref outputs "out"))
-                    (bin (string-append out "/bin")))
-               (for-each (lambda (file)
-                           (install-file file bin))
-                         (list "minced" "minced.jar"))))))))
-    (native-inputs
-     `(("jdk", icedtea "jdk")))
-    (inputs
-     `(("jre", icedtea)))
-    (home-page "https://github.com/ctSkennerton/minced")
-    (synopsis "Mining CRISPRs in Environmental Datasets")
-    (description
-     "MinCED is a program to find Clustered Regularly Interspaced Short Palindromic
-Repeats (CRISPRs) in full genomes or environmental datasets such as metagenomes,
-in which sequence size can be anywhere from 100 to 800 bp.")
-    (license license:gpl3)))
-
 (define-public qiime2
   (package
     (name "qiime2")
