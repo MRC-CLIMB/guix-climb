@@ -23,7 +23,6 @@
   #:use-module (guix download)
   #:use-module (guix build-system gnu)
   #:use-module (guix build-system python)
-  #:use-module (climb packages capnproto)
   #:use-module (climb packages compression)
   #:use-module (climb packages python)
   #:use-module (gnu packages)
