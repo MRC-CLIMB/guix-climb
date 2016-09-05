@@ -443,7 +443,7 @@ complete or draft form.")
 (define-public mash
   (package
     (name "mash")
-    (version "1.1")
+    (version "1.1.1")
     (source (origin
               (method url-fetch)
               (uri (string-append
@@ -452,10 +452,15 @@ complete or draft form.")
               (file-name (string-append name "-" version ".tar.gz"))
               (sha256
                (base32
-                "07f4bpz15ggqmr9q7wp1022m0h904zx5l7xxla4w4r7yvghwaygg"))))
+                "08znbvqq5xknfhmpp3wcj574zvi4p7i8zifi67c9qw9a6ikp42fj"))
+              (modules '((guix build utils)))
+              (snippet
+               ;; Delete bundled kseq.
+               ;; TODO: Also delete bundled murmurhash and open bloom filter.
+               '(delete-file "src/mash/kseq.h"))))
     (build-system gnu-build-system)
     (arguments
-     `(#:tests? #f ;; no check target
+     `(#:tests? #f ; No tests.
        #:configure-flags
        (list
         (string-append "--with-capnp=" (assoc-ref %build-inputs "capnproto"))
@@ -463,20 +468,29 @@ complete or draft form.")
        #:make-flags (list "CC=gcc")
        #:phases
        (modify-phases %standard-phases
-         (add-before 'configure 'autoconf
+         (add-after 'unpack 'fix-includes
            (lambda _
-             (zero? (system* "autoconf")))))))
-    (native-inputs `(("autoconf" ,autoconf)))
-    (inputs
-     `(("zlib" ,zlib)
+             (substitute* '("src/mash/Sketch.cpp" "src/mash/CommandFind.cpp")
+               (("^#include \"kseq\\.h\"")
+                "#include \"htslib/kseq.h\""))
+             #t))
+         (add-before 'configure 'autoconf
+           (lambda _ (zero? (system* "autoconf")))))))
+    (native-inputs
+     `(("autoconf" ,autoconf)
        ("capnproto" ,capnproto)
-       ("gsl" ,gsl)))
+       ("htslib" ,htslib)))
+    (inputs
+     `(("gsl" ,gsl)
+       ("zlib" ,zlib)))
     (home-page "https://mash.readthedocs.io")
     (synopsis "Fast genome and metagenome distance estimation using MinHash")
-    (description "Mash is a fast sequence distance estimator that uses the MinHash
-algorithm and is designed to work with genomes and metagenomes in the form of
-assemblies or reads.")
-    (license license:bsd-3)))
+    (description "Mash is a fast sequence distance estimator that uses the
+MinHash algorithm and is designed to work with genomes and metagenomes in the
+form of assemblies or reads.")
+    ;; Mash is distributed under 3-clause BSD, but includes software covered
+    ;; by other licenses.
+    (license (list license:bsd-3 license:public-domain license:cpl1.0))))
 
 (define-public kraken
   (package
