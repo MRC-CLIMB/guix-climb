@@ -26,30 +26,6 @@
   #:use-module (gnu packages)
   #:use-module (gnu packages python))
 
-(define-public python-odfpy
-  (package
-    (name "python-odfpy")
-    (version "1.3.3")
-    (source
-     (origin
-       (method url-fetch)
-       (uri (pypi-uri "odfpy" version))
-       (sha256
-        (base32
-         "1a6ms0w9zfhhkqhvrnynwwbxrivw6hgjc0s5k7j06npc7rq0blxw"))))
-    (arguments
-     `(#:phases
-       (modify-phases %standard-phases
-         (replace 'check
-           (lambda _
-             (system* "make" "-C" "tests"))))))
-    (build-system python-build-system)
-    (home-page "https://github.com/eea/odfpy")
-    (synopsis "API for OpenDocument in Python")
-    (description "Collection of utility programs written in Python to manipulate
-OpenDocument 1.2 files.")
-    (license (list license:asl2.0 license:gpl2))))
-
 (define-public python-ipymd
   (package
     (name "python-ipymd")
@@ -134,6 +110,7 @@ create and share documents that contain live code, equations, visualizations and
 explanatory text.  Uses include: data cleaning and transformation, numerical
 simulation, statistical modeling, machine learning and much more.")
     (license license:bsd-3)))
+
 (define-public python-ijson
   (package
     (name "python-ijson")
