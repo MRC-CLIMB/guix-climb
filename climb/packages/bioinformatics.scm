@@ -802,7 +802,7 @@ sample x feature tables.")
 (define-public q2-diversity
   (package
     (name "q2-diversity")
-    (version "0.0.1")
+    (version "0.0.2")
     (source
      (origin
        (method url-fetch)
@@ -812,7 +812,7 @@ sample x feature tables.")
        (file-name (string-append name "-" version ".tar.gz"))
        (sha256
         (base32
-         "12596zc3v7v7hslvql84msw8p115kjijzmm5lypgh3qya8qg8vi5"))))
+         "0snalib8yhs9qvbj9qf0g8d4cp21bj5f8ia58wz6rr7xifdfgw9m"))))
     (build-system python-build-system)
     (propagated-inputs
      `(("python-biom-format" ,python-biom-format)
