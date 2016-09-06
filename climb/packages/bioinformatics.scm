@@ -727,7 +727,7 @@ bioinformatics.")
 (define-public q2-types
   (package
     (name "q2-types")
-    (version "0.0.1")
+    (version "0.0.2")
     (source
      (origin
        (method url-fetch)
@@ -737,7 +737,7 @@ bioinformatics.")
        (file-name (string-append name "-" version ".tar.gz"))
        (sha256
         (base32
-         "016awdz8aasgjv7wp2nkccmp0cc02r6ahkmvbhg7a57mbiy77spp"))))
+         "0s8r0291ia51rsmpah6cd1w6w4zw74jv0b1jh3vpf4awrlf7484r"))))
     (build-system python-build-system)
     (arguments
      `(#:tests? #f ;; FIXME: tests require GTK
