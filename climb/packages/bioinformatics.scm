@@ -635,7 +635,7 @@ read-pair linkage - to automatically bin metagenomic contigs into genomes.")
 (define-public qiime2
   (package
     (name "qiime2")
-    (version "2.0.1")
+    (version "2.0.2")
     (source
      (origin
        (method url-fetch)
@@ -645,11 +645,12 @@ read-pair linkage - to automatically bin metagenomic contigs into genomes.")
        (file-name (string-append name "-" version ".tar.gz"))
        (sha256
         (base32
-         "1bxf4vbgxi62pc1cvw5pgrb826ky0xm40bplv2k4cz64pmba067n"))))
+         "0f0725s9r87r9rqgzfyfyr5yzhdvi5r6xf0yn71s9b6lc5n0wlrw"))))
     (build-system python-build-system)
     (propagated-inputs
      `(("python-pyyaml" ,python-pyyaml)
        ("python-decorator" ,python-decorator)
+       ("python-cookiecutter" ,python-cookiecutter)
        ("python-ipymd" ,python-ipymd)
        ("python-jupyter" ,python-jupyter)
        ("python-frontmatter" ,python-frontmatter)
