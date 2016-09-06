@@ -246,3 +246,88 @@ pyflakes.")
     (synopsis "Sorts lists naturally")
     (description "Natural sorting for python")
     (license license:expat)))
+
+(define-public python-whichcraft
+  (package
+    (name "python-whichcraft")
+    (version "0.4.0")
+    (source (origin
+              (method url-fetch)
+              (uri (pypi-uri "whichcraft" version))
+              (sha256
+               (base32
+                "1aa9h0by4d51r64aad4pd2rn4wf510c9r179wwb8baspy7cx4mp7"))))
+    (build-system python-build-system)
+    (home-page "https://github.com/pydanny/whichcraft")
+    (synopsis "Cross-platform cross-python shutil.which functionality")
+    (description
+     "Whichcraft is a shim of the shutil.which function that's designed to
+work across multiple versions of Python")
+    (license license:bsd-3)))
+
+(define-public python-poyo
+  (package
+    (name "python-poyo")
+    (version "0.4.0")
+    (source (origin
+              (method url-fetch)
+              (uri (pypi-uri "poyo" version))
+              (sha256
+               (base32
+                "1f48ffl0j1f2lmgabajps7v8w90ppxbp5168gh8kh27bjd8xk5ca"))))
+    (build-system python-build-system)
+    (home-page "https://github.com/hackebrot/poyo")
+    (synopsis "Lightweight YAML Parser for Python")
+    (description
+     "Poyo does not allow deserialization of arbitrary Python objects.
+Supported types are str, bool, int, float, NoneType as well as dict and list
+values.")
+    (license license:expat)))
+
+(define-public python-jinja2-time
+  (package
+    (name "python-jinja2-time")
+    (version "0.2.0")
+    (source (origin
+              (method url-fetch)
+              (uri (pypi-uri "jinja2-time" version))
+              (sha256
+               (base32
+                "0h0dr7cfpjnjj8bgl2vk9063a53649pn37wnlkd8hxjy656slkni"))))
+    (build-system python-build-system)
+    (propagated-inputs
+     `(("python-arrow" ,python-arrow)
+       ("python-jinja2" ,python-jinja2)))
+    (home-page "https://github.com/hackebrot/jinja2-time")
+    (synopsis "Jinja2 extension for dates and times")
+    (description
+     "Jinja2 extension that provides support for date and time objects.")
+    (license license:expat)))
+
+(define-public python-cookiecutter
+  (package
+    (name "python-cookiecutter")
+    (version "1.4.0")
+    (source (origin
+              (method url-fetch)
+              (uri (pypi-uri "cookiecutter" version))
+              (sha256
+               (base32
+                "1vbbzid38qg9a7y7111qv6g50gq5msggxgss8gcwbkws1x454k8b"))))
+    (build-system python-build-system)
+    (propagated-inputs
+     `(("python-future" ,python-future)
+       ("python-binaryornot" ,python-binaryornot)
+       ("python-jinja2" ,python-jinja2)
+       ("python-click" ,python-click)
+       ("python-whichcraft" ,python-whichcraft)
+       ("python-poyo" ,python-poyo)
+       ("python-jinja2-time" ,python-jinja2-time)))
+    (home-page "https://github.com/audreyr/cookiecutter")
+    (synopsis "Command-line utility that creates projects from
+cookiecutters (project templates)")
+    (description
+     "A command-line utility that creates projects from cookiecutters
+(project templates), e.g. creating a Python package project from a Python
+package project template.")
+    (license license:bsd-3)))
