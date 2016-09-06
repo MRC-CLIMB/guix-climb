@@ -667,7 +667,7 @@ assignment, and phylogenetic reconstruction, and diversity analyses and visualiz
 (define-public q2cli
   (package
     (name "q2cli")
-    (version "0.0.2")
+    (version "0.0.3")
     (source
      (origin
        (method url-fetch)
@@ -677,7 +677,7 @@ assignment, and phylogenetic reconstruction, and diversity analyses and visualiz
        (file-name (string-append name "-" version ".tar.gz"))
        (sha256
         (base32
-         "1vs2hi9w95niprb7ap08dypjk340wwlw7axipfam67fflb2r1w3a"))))
+         "1x5ykghj3zpjp3kjd7pmc837xgyq0y4l0h4radl66r431mdif91x"))))
     (build-system python-build-system)
     (propagated-inputs
      `(("python-click" ,python-click)
