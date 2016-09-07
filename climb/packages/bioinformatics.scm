@@ -31,6 +31,8 @@
   #:use-module (gnu packages boost)
   #:use-module (gnu packages check)
   #:use-module (gnu packages compression)
+  #:use-module (gnu packages haskell)
+  #:use-module (gnu packages imagemagick)
   #:use-module (gnu packages java)
   #:use-module (gnu packages machine-learning)
   #:use-module (gnu packages maths)
@@ -884,3 +886,43 @@ in QIIME 2.")
     (description "Prokka is a tool to annotate bacterial, archaeal and
 viral genomes quickly and produce standards-compliant output files.")
     (license license:gpl3+)))
+
+(define-public nullarbor
+  (package
+    (name "nullarbor")
+    (version "1.01")
+    (source (origin
+              (method url-fetch)
+              (uri (string-append
+                    "https://github.com/tseemann/nullarbor/archive/v"
+                    version ".tar.gz"))
+              (file-name (string-append name "-" version ".tar.gz"))
+              (sha256
+               (base32
+                "0lx4llycamwdmp4rkgzrkww1prl73v8pgr2gnh3plfqb0ialimxk"))))
+    (build-system perl-build-system)
+    (arguments
+     `(#:tests? #f
+       #:phases
+       (modify-phases %standard-phases
+         (delete 'configure)
+         (delete 'build)
+         (replace 'install
+           (lambda* (#:key outputs #:allow-other-keys)
+             (let ((out (assoc-ref outputs "out")))
+               (copy-recursively "." out)))))))
+    ;; TODO: Replace paths instead of propagating.
+    (propagated-inputs
+     `(("automake" ,automake)
+       ("ghc-pandoc" ,ghc-pandoc)
+       ("imagemagick" ,imagemagick)
+       ("kraken" ,kraken)
+       ("prokka" ,prokka)
+       ("bioperl-minimal" ,bioperl-minimal)
+       ("perl-moo" ,perl-moo)
+       ("perl-yaml-tiny" ,perl-yaml-tiny)))
+    (home-page "https://github.com/tseemann/nullarbor")
+    (synopsis "Pipeline to generate microbiology reports from sequenced isolates")
+    (description "Nullarbor is a pipeline to generate complete public health
+microbiology reports from sequenced isolates.")
+    (license license:gpl2)))
