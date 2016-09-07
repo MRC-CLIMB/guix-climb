@@ -22,6 +22,7 @@
   #:use-module (guix packages)
   #:use-module (guix download)
   #:use-module (guix build-system gnu)
+  #:use-module (guix build-system perl)
   #:use-module (guix build-system python)
   #:use-module (climb packages python)
   #:use-module (gnu packages)
@@ -34,13 +35,15 @@
   #:use-module (gnu packages machine-learning)
   #:use-module (gnu packages maths)
   #:use-module (gnu packages mpi)
+  #:use-module (gnu packages parallel)
   #:use-module (gnu packages pdf)
   #:use-module (gnu packages perl)
   #:use-module (gnu packages pkg-config)
   #:use-module (gnu packages python)
   #:use-module (gnu packages serialization)
   #:use-module (gnu packages statistics)
-  #:use-module (gnu packages shells))
+  #:use-module (gnu packages shells)
+  #:use-module (gnu packages xml))
 
 (define-public fastaq
   (package
@@ -830,3 +833,54 @@ sample x feature tables.")
 beta diversity analyses (as well as some related statistics and visualizations)
 in QIIME 2.")
     (license license:bsd-3)))
+
+(define-public prokka
+  (package
+    (name "prokka")
+    (version "1.11")
+    (source (origin
+              (method url-fetch)
+              (uri (string-append
+                    "http://www.vicbioinformatics.com/prokka-"
+                    version ".tar.gz"))
+              (sha256
+               (base32
+                "1bh1h6bk6sjzcsvw8qjkbnfvg9c6yqsvna4ydj7arrlgfrn1867f"))
+              (modules '((guix build utils)))
+              (snippet
+               ;; Drop bundled binaries.
+               '(delete-file-recursively "binaries"))))
+    (build-system perl-build-system)
+    (arguments
+     `(#:tests? #f ; No tests.
+       #:phases
+       (modify-phases %standard-phases
+         (delete 'configure)
+         (delete 'build)
+         (replace 'install
+           (lambda* (#:key outputs #:allow-other-keys)
+             (let* ((out (assoc-ref outputs "out"))
+                    (bin (string-append out "/bin"))
+                    (doc (string-append out "/doc"))
+                    (db (string-append out "/db")))
+               (for-each (λ (f) (install-file f bin))
+                         (find-files "bin" "prokka.*"))
+               (copy-recursively "doc" doc)
+               (copy-recursively "db" db)))))))
+    ;; TODO: Replace paths instead of propagating.
+    ;; It also bundles NCBI 'tbl2asn' for which no source is available.
+    (propagated-inputs
+     `(("aragorn" ,aragorn)
+       ("blast+" ,blast+)
+       ("hmmer" ,hmmer)
+       ("infernal" ,infernal)
+       ("minced" ,minced)
+       ("parallel" ,parallel)
+       ("prodigal" ,prodigal)
+       ("bioperl-minimal" ,bioperl-minimal)
+       ("perl-xml-simple" ,perl-xml-simple)))
+    (home-page "https://github.com/tseemann/prokka")
+    (synopsis "Rapid prokaryotic genome annotation")
+    (description "Prokka is a tool to annotate bacterial, archaeal and
+viral genomes quickly and produce standards-compliant output files.")
+    (license license:gpl3)))
