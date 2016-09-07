@@ -883,4 +883,4 @@ in QIIME 2.")
     (synopsis "Rapid prokaryotic genome annotation")
     (description "Prokka is a tool to annotate bacterial, archaeal and
 viral genomes quickly and produce standards-compliant output files.")
-    (license license:gpl3)))
+    (license license:gpl3+)))
