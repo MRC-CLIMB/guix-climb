@@ -21,6 +21,7 @@
   #:use-module ((guix licenses) #:prefix license:)
   #:use-module (guix packages)
   #:use-module (guix download)
+  #:use-module (guix build-system ant)
   #:use-module (guix build-system gnu)
   #:use-module (guix build-system perl)
   #:use-module (guix build-system python)
@@ -28,6 +29,7 @@
   #:use-module (gnu packages)
   #:use-module (gnu packages autotools)
   #:use-module (gnu packages bioinformatics)
+  #:use-module (gnu packages bash)
   #:use-module (gnu packages boost)
   #:use-module (gnu packages check)
   #:use-module (gnu packages compression)
@@ -45,7 +47,8 @@
   #:use-module (gnu packages serialization)
   #:use-module (gnu packages statistics)
   #:use-module (gnu packages shells)
-  #:use-module (gnu packages xml))
+  #:use-module (gnu packages xml)
+  #:use-module (gnu packages zip))
 
 (define-public fastaq
   (package
@@ -926,3 +929,51 @@ viral genomes quickly and produce standards-compliant output files.")
     (description "Nullarbor is a pipeline to generate complete public health
 microbiology reports from sequenced isolates.")
     (license license:gpl2)))
+
+(define-public trimmomatic
+  (package
+    (name "trimmomatic")
+    (version "0.36")
+    (source (origin
+              (method url-fetch)
+              (uri (string-append
+                    "http://www.usadellab.org/cms/uploads/supplementary/"
+                    "Trimmomatic/Trimmomatic-Src-" version ".zip"))
+              (sha256
+               (base32
+                "08dr28248vpcjqx52zz1vg3s50x5bfqlh1n5z2816a4r0waimfyc"))))
+    ;; XXX: This package bundles jbzip2.jar, for which no official source exists.
+    (build-system ant-build-system)
+    (arguments
+     `(#:tests? #f
+       #:build-target "dist"
+       #:phases
+       (modify-phases %standard-phases
+         (replace 'install ; No install target.
+           (lambda* (#:key inputs outputs #:allow-other-keys)
+             (let* ((out (assoc-ref outputs "out"))
+                    (bin (string-append out "/bin"))
+                    (jar-name (string-append "trimmomatic-" ,version ".jar"))
+                    (wrapper (string-append bin "/trimmomatic")))
+           (install-file (string-append "dist/jar/" jar-name) bin)
+           (with-output-to-file wrapper
+             (lambda _
+               (display
+                (string-append
+                 "#!" (assoc-ref inputs "bash") "/bin/sh\n\n"
+                 (assoc-ref inputs "jre") "/bin/java -jar "
+                 bin "/" jar-name " \"$@\"\n"))))
+           (chmod wrapper #o555)))))))
+    (native-inputs
+     `(("bash" ,bash)
+       ("jdk" ,icedtea "jdk")
+       ("unzip" ,unzip)))
+    (inputs
+     `(("jre" ,icedtea "out")))
+    (home-page "http://www.usadellab.org/cms/index.php?page=trimmomatic")
+    (synopsis "Flexible read trimming tool for Illumina NGS data")
+    (description
+     "Trimmomatic performs a variety of useful trimming tasks for illumina
+paired-end and single ended data.The selection of trimming steps and their
+associated parameters are supplied on the command line.")
+    (license (list license:gpl3 license:expat)))) ; jbzip2 is MIT
