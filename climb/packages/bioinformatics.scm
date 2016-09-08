@@ -979,3 +979,55 @@ microbiology reports from sequenced isolates.")
 paired-end and single ended data.The selection of trimming steps and their
 associated parameters are supplied on the command line.")
     (license (list license:gpl3 license:expat)))) ; jbzip2 is MIT
+
+(define-public brig
+  ;; XXX: Binary package with bundled dependencies!
+  (package
+    (name "brig")
+    (version "0.95")
+    (source (origin
+              (method url-fetch)
+              (uri (string-append
+                    "mirror://sourceforge/brig/BRIG-" version
+                    "-dist.zip"))
+              (sha256
+               (base32
+                "1rw0y2l4w0dkwckv7d0spx522qq7whrqb956jkxxcalnjbmm2kx9"))))
+    (build-system ant-build-system)
+    (arguments
+     `(#:tests? #f
+       #:phases
+       (modify-phases %standard-phases
+         (delete 'configure)
+         (delete 'build)
+         (replace 'install
+           (lambda* (#:key inputs outputs #:allow-other-keys)
+             (let* ((out (assoc-ref outputs "out"))
+                    (bin (string-append out "/bin"))
+                    (lib (string-append bin "/lib"))
+                    (jar-name "BRIG.jar")
+                    (wrapper (string-append bin "/brig")))
+               (install-file jar-name bin)
+               (copy-recursively "lib" lib)
+               (with-output-to-file wrapper
+                 (lambda _
+                   (display
+                    (string-append
+                     "#!" (assoc-ref inputs "bash") "/bin/sh\n\n"
+                     (assoc-ref inputs "jre") "/bin/java -jar "
+                     bin "/" jar-name " \"$@\"\n"))))
+               (chmod wrapper #o555)))))))
+    (native-inputs
+     `(("bash" ,bash)
+       ;("jdk" ,icedtea "jdk")
+       ("unzip" ,unzip)))
+    (inputs
+     `(("jre" ,icedtea-6 "out")))
+    (home-page "http://brig.sourceforge.net")
+    (synopsis "BLAST Ring Image Generator")
+    (description
+     "BRIG can display circular comparisons between a large number of
+genomes, with a focus on handling genome assembly data.")
+    (license (list license:gpl3 ; BRIG
+                   license:bsd-4 ; jdom
+                   license:lgpl2.1)))) ; swing-layout
