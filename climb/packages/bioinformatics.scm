@@ -447,58 +447,6 @@ complete or draft form.")
     (description "Python3 wrapper for running MUMmer and parsing the output.")
     (license license:gpl3)))
 
-(define-public mash
-  (package
-    (name "mash")
-    (version "1.1.1")
-    (source (origin
-              (method url-fetch)
-              (uri (string-append
-                    "https://github.com/marbl/mash/archive/v"
-                    version ".tar.gz"))
-              (file-name (string-append name "-" version ".tar.gz"))
-              (sha256
-               (base32
-                "08znbvqq5xknfhmpp3wcj574zvi4p7i8zifi67c9qw9a6ikp42fj"))
-              (modules '((guix build utils)))
-              (snippet
-               ;; Delete bundled kseq.
-               ;; TODO: Also delete bundled murmurhash and open bloom filter.
-               '(delete-file "src/mash/kseq.h"))))
-    (build-system gnu-build-system)
-    (arguments
-     `(#:tests? #f ; No tests.
-       #:configure-flags
-       (list
-        (string-append "--with-capnp=" (assoc-ref %build-inputs "capnproto"))
-        (string-append "--with-gsl=" (assoc-ref %build-inputs "gsl")))
-       #:make-flags (list "CC=gcc")
-       #:phases
-       (modify-phases %standard-phases
-         (add-after 'unpack 'fix-includes
-           (lambda _
-             (substitute* '("src/mash/Sketch.cpp" "src/mash/CommandFind.cpp")
-               (("^#include \"kseq\\.h\"")
-                "#include \"htslib/kseq.h\""))
-             #t))
-         (add-before 'configure 'autoconf
-           (lambda _ (zero? (system* "autoconf")))))))
-    (native-inputs
-     `(("autoconf" ,autoconf)
-       ("capnproto" ,capnproto)
-       ("htslib" ,htslib)))
-    (inputs
-     `(("gsl" ,gsl)
-       ("zlib" ,zlib)))
-    (home-page "https://mash.readthedocs.io")
-    (synopsis "Fast genome and metagenome distance estimation using MinHash")
-    (description "Mash is a fast sequence distance estimator that uses the
-MinHash algorithm and is designed to work with genomes and metagenomes in the
-form of assemblies or reads.")
-    ;; Mash is distributed under 3-clause BSD, but includes software covered
-    ;; by other licenses.
-    (license (list license:bsd-3 license:public-domain license:cpl1.0))))
-
 (define-public kraken
   (package
     (name "kraken")
