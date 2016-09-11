@@ -140,30 +140,6 @@ simulation, statistical modeling, machine learning and much more.")
 iterator interface.")
     (license license:bsd-3)))
 
-(define-public python-cachecontrol
-  (package
-    (name "python-cachecontrol")
-    (version "0.11.6")
-    (source
-     (origin
-       (method url-fetch)
-       (uri (pypi-uri "CacheControl" version))
-       (sha256
-        (base32
-         "15bn8xll6z15h0zqhfjy1n8dn8p0fcb4m0rhnfanq63z7r2wpprp"))))
-    (build-system python-build-system)
-    (arguments
-    `(#:configure-flags '("--single-version-externally-managed"
-                          "--root=/"))) ;; avoid making eggs
-    (propagated-inputs
-     `(("python-requests" ,python-requests)
-       ("python-lockfile" ,python-lockfile)))
-    (home-page "https://github.com/ionrock/cachecontrol")
-    (synopsis "The httplib2 caching algorithms packaged up for use with requests")
-    (description "CacheControl is a port of the caching algorithms in httplib2 for
-use with requests session object.")
-    (license license:asl2.0)))
-
 (define-public python-pytest-pep8
   (package
     (name "python-pytest-pep8")
