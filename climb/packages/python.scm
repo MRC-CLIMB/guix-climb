@@ -253,3 +253,46 @@ mobile-friendly responsive design.")
              (native-inputs
               `(("python2-setuptools" ,python2-setuptools)
                 ,@(package-native-inputs base))))))
+
+(define-public python-sphinx-argparse
+  (package
+    (name "python-sphinx-argparse")
+    (version "0.1.15")
+    (source (origin
+              (method url-fetch)
+              (uri (pypi-uri "sphinx-argparse" version))
+              (sha256
+               (base32
+                "14wdxq379xxnhw0kgf8z6jqdi0rd4k5y20jllyar9mxwwjblayvq"))))
+    (build-system python-build-system)
+    (arguments
+     `(#:configure-flags '("--single-version-externally-managed" "--root=/")
+       #:phases
+       (modify-phases %standard-phases
+         (add-after 'unpack 'adjust-tests
+           ;; Two tests compare the output of "py.test --help" and fail
+           ;; when it gets ".py.test-real" back, so we substitute it here.
+           (lambda _
+             (substitute* "test/test_parser.py"
+               (("py.test") ".py.test-real"))
+             #t))
+         (delete 'check)
+         (add-after 'install 'check
+           (lambda _ (zero? (system* "py.test" "-vv")))))))
+    (native-inputs
+     `(("python-pytest" ,python-pytest)))
+    (propagated-inputs
+     `(("python-sphinx" ,python-sphinx)
+       ("python-docutils" ,python-docutils)))
+    (home-page "https://github.com/ribozz/sphinx-argparse")
+    (synopsis "Sphinx extension to document argparse commands")
+    (description
+     "Sphinx extension that automatically documents argparse commands and options")
+    (license license:expat)))
+
+(define-public python2-sphinx-argparse
+  (let ((base (package-with-python2 (strip-python2-variant python-sphinx-argparse))))
+    (package (inherit base)
+             (native-inputs
+              `(("python2-setuptools" ,python2-setuptools)
+                ,@(package-native-inputs base))))))
