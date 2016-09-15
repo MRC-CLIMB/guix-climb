@@ -21,11 +21,14 @@
   #:use-module ((guix licenses) #:prefix license:)
   #:use-module (guix packages)
   #:use-module (guix download)
+  #:use-module (guix git-download)
   #:use-module (guix build-system ant)
   #:use-module (guix build-system gnu)
   #:use-module (guix build-system perl)
   #:use-module (guix build-system python)
   #:use-module (climb packages python)
+  #:use-module (climb packages serialization)
+  #:use-module (climb packages xml)
   #:use-module (gnu packages)
   #:use-module (gnu packages autotools)
   #:use-module (gnu packages bioinformatics)
@@ -927,3 +930,52 @@ microbiology reports from sequenced isolates.")
 paired-end and single ended data.The selection of trimming steps and their
 associated parameters are supplied on the command line.")
     (license (list license:gpl3 license:expat)))) ; jbzip2 is MIT
+
+(define-public python2-pbcommand
+  ;; Upstream does not tag git releases and PyPi is out of date.
+  ;; See https://github.com/PacificBiosciences/pbcommand/issues/116
+  (let ((revision "1")
+        (commit "e8d577ac3f92a2dedae1470fcf00cabdf22ce824"))
+    (package
+      (name "python2-pbcommand")
+      (version (string-append "0.4.11-" revision "." (string-take commit 7)))
+      (source (origin
+                (method git-fetch)
+                (uri (git-reference
+                      (url "https://github.com/PacificBiosciences/pbcommand.git")
+                      (commit commit)))
+                (file-name (string-append name "-" version "-checkout"))
+                (sha256
+                 (base32
+                  "0vflh06q23swbdps22rv0qwbsj550mw94ifn5zc84pps8irnkiiq"))))
+      (build-system python-build-system)
+      (arguments
+       `(#:python ,python-2
+         #:configure-flags '("--single-version-externally-managed" "--root=/")
+         #:phases
+         (modify-phases %standard-phases
+           (add-after 'unpack 'substitute-/bin/bash
+             (lambda _
+               ;; Fully qualify /bin/bash for running external commands.
+               (substitute* "pbcommand/engine/runner.py"
+                 (("/bin/bash") (which "bash")))))
+           (replace 'check
+             (lambda _ (zero? (system* "nosetests" "-v")))))))
+      (native-inputs
+       `(("python2-nose" ,python2-nose)
+         ("python2-sphinx-bootstrap-theme" ,python2-sphinx-bootstrap-theme)
+         ("python2-sphinx-argparse" ,python2-sphinx-argparse)
+         ("python2-tox" ,python2-tox)
+         ("python2-setuptools" ,python2-setuptools)))
+      (propagated-inputs
+       `(("python2-functools32" ,python2-functools32)
+         ("python2-jsonschema" ,python2-jsonschema)
+         ("python2-numpy" ,python2-numpy "out")
+         ("python2-avro" ,python2-avro)
+         ("python2-requests" ,python2-requests)
+         ("python2-iso8601" ,python2-iso8601)))
+      (home-page "https://github.com/PacificBiosciences/pbcommand")
+      (synopsis "PacBio common models and CLI tool contract interface")
+      (description "PacBio library for common utils, models, and tools
+to interface with pbsmrtpipe workflow engine.")
+      (license license:bsd-3))))
