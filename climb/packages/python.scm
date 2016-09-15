@@ -224,3 +224,32 @@ cookiecutters (project templates)")
 (project templates), e.g. creating a Python package project from a Python
 package project template.")
     (license license:bsd-3)))
+
+(define-public python-sphinx-bootstrap-theme
+  (package
+    (name "python-sphinx-bootstrap-theme")
+    (version "0.4.12")
+    (source (origin
+              (method url-fetch)
+              (uri (pypi-uri "sphinx-bootstrap-theme" version))
+              (sha256
+               (base32
+                "0wmm292rpfzxaib7zf2j6kdl1dl2xzx303hx8sx8qsdy0pkmrk65"))))
+    (build-system python-build-system)
+    (arguments
+     `(#:tests? #f ; No tests.
+       #:configure-flags '("--single-version-externally-managed" "--root=/")))
+    (home-page "https://ryan-roemer.github.io/sphinx-bootstrap-theme/README.html")
+    (synopsis "Bootstrap theme for Sphinx")
+    (description "Sphinx theme that integrates the Bootstrap CSS / JavaScript
+framework with various layout options, hierarchical menu navigation, and
+mobile-friendly responsive design.")
+    (license license:expat)))
+
+(define-public python2-sphinx-bootstrap-theme
+  (let ((base (package-with-python2 (strip-python2-variant
+                                     python-sphinx-bootstrap-theme))))
+    (package (inherit base)
+             (native-inputs
+              `(("python2-setuptools" ,python2-setuptools)
+                ,@(package-native-inputs base))))))
