@@ -518,7 +518,7 @@ sequences, usually obtained through metagenomic studies.")
     (native-inputs
      `(("python2-mock" ,python2-mock)))
     (propagated-inputs
-     `(("python2-scipy" ,python2-scipy)
+     `(("python2-scipy" ,python2-scipy "out")
        ("bowtie" ,bowtie)
        ("samtools" ,samtools)))
     (home-page "https://katholt.github.io/srst2/")
