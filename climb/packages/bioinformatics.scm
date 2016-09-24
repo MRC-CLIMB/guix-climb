@@ -50,6 +50,7 @@
   #:use-module (gnu packages serialization)
   #:use-module (gnu packages statistics)
   #:use-module (gnu packages shells)
+  #:use-module (gnu packages swig)
   #:use-module (gnu packages xml)
   #:use-module (gnu packages zip))
 
@@ -979,3 +980,117 @@ associated parameters are supplied on the command line.")
       (description "PacBio library for common utils, models, and tools
 to interface with pbsmrtpipe workflow engine.")
       (license license:bsd-3))))
+
+(define-public consensuscore
+  ;; Upstream uses another revision control system and does not make
+  ;; git tags for all versions. So we use raw commits instead.
+  (let ((revision "1")
+        (commit "b579c738f24061f430914737f10cccb9212cc9cf"))
+    (package
+      (name "consensuscore")
+      (version (string-append "1.0.2-" revision "." (string-take commit 7)))
+      (source (origin
+                (method git-fetch)
+                (uri (git-reference
+                      (url "https://github.com/PacificBiosciences/ConsensusCore.git")
+                      (commit commit)))
+                (file-name (string-append name "-" version "-checkout"))
+                (sha256
+                 (base32
+                  "1jpzgnk8grk6amxd5drcgabzr3ymd7ib1cqhw65c6s1y1m1qd14y"))))
+      (build-system gnu-build-system)
+      (arguments
+       `(#:phases
+         (modify-phases %standard-phases
+           (add-after 'unpack 'patch-makefile
+             (lambda _
+               (substitute* "make/Defs.mk"
+                 (("SHELL=/bin/bash")
+                  (string-append "SHELL=" (which "bash"))))
+               #t))
+           (replace 'configure
+             (lambda* (#:key inputs #:allow-other-keys)
+               (zero? (system*
+                       "./configure"
+                       (string-append "--boost="
+                                      (assoc-ref inputs "boost") "/include")
+                       (string-append "--swig="
+                                      (assoc-ref inputs "swig") "/bin/swig")))))
+           (replace 'install ; No install target.
+             (lambda* (#:key outputs #:allow-other-keys)
+               (let* ((out (assoc-ref outputs "out"))
+                      (lib (string-append out "/lib"))
+                      (include (string-append out "/include")))
+                 (install-file "build/C++/libConsensusCore.a" lib)
+                 (copy-recursively "include" include)))))))
+      (native-inputs
+       `(("python", python-2)
+         ("swig" ,swig)
+         ;("googletest" ,googletest) ; TODO: remove bundled gtest.
+         ("python-wrapper" ,python-wrapper)))
+      (inputs
+       `(("boost" ,boost)))
+      (home-page "https://github.com/PacificBiosciences/ConsensusCore")
+      (synopsis
+       "C++ library of multiple-sequence consensus routines with SWIG bindings")
+      (description
+       "ConsensusCore is a library of C++ algorithms for PacBio multiple sequence
+consensus that powers Quiver (Python) and ConsensusTools (.NET).")
+      (license license:bsd-3))))
+
+(define-public python2-consensuscore
+  (package
+    (inherit consensuscore) ; For version, source and description.
+    (name "python2-consensuscore")
+    (build-system python-build-system)
+    (arguments
+     `(#:python ,python-2
+       #:tests? #f ; TODO: there is a 'test-python' make target but it needs setup.
+       #:phases
+       (modify-phases %standard-phases
+         (add-after 'unpack 'patch-makefiles
+           (lambda _
+             (substitute* "make/Defs.mk"
+               (("SHELL=/bin/bash") (string-append
+                                     "SHELL=" (which "bash"))))
+             ;; Prevent library from being built twice.
+             (substitute* "Makefile"
+               (("^python: lib") "python:"))
+             (substitute* "make/Python.mk"
+               (("^\\$\\(PYTHON_DLL\\): \\$\\(SWIG_INTERFACES\\) \\$\\(CXX_LIB\\)")
+                "$(PYTHON_DLL): $(SWIG_INTERFACES)"))
+             #t))
+         (add-before 'build 'configure
+           (lambda* (#:key inputs #:allow-other-keys)
+             (zero?
+              (system*
+               "./configure"
+               (string-append "--boost=" (assoc-ref inputs "boost") "/include")
+               (string-append "--swig=" (assoc-ref inputs "swig") "/bin/swig")
+               (string-append "--python-include=" (assoc-ref inputs "python")
+                              "/include/python2.7")
+               (string-append "--numpy-include=" (assoc-ref inputs "python2-numpy")
+                              "/lib/python2.7/site-packages/numpy"
+                              "/core/include")))))
+         (replace 'build
+           (lambda* (#:key inputs #:allow-other-keys)
+             (zero? (system* "make" "python"
+                             (string-append "CXX_LIB="
+                                            (assoc-ref inputs "consensuscore")
+                                            "/lib/libConsensusCore.a")))))
+         (add-before 'install 'patch-setup.py
+           (lambda _
+             (substitute* "setup.py"
+               ;; setup.py contains a hack that adds "build" to
+               ;; the install command. We need to un-do that.
+               (("sys\\.argv\\.insert\\(installPos, \"build\"\\)")
+                "True"))
+             #t)))))
+    (native-inputs
+     `(("python2-setuptools" ,python2-setuptools)
+       ("consensuscore" ,consensuscore)
+       ("python2-numpy" ,python2-numpy "out")
+       ("swig" ,swig)))
+    (inputs
+     `(("boost" ,boost)))
+    (synopsis "Python interface to the ConsensusCore algorithms")))
